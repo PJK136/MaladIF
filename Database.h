@@ -1,18 +1,33 @@
 #ifndef DATABASE_H
 #define DATABASE_H
-#include "FingerPrint.h"
+
+#include "Fingerprint.h"
+#include "Diagnosis.h"
+#include "Metadata.h"
+
+#include <vector>
+#include <utility>
+#include <string>
+#include <list>
+#include <unordered_map>
 
 class Database
 {
     public:
         Database();
-        bool loadMetadata(std::string filename);
-        bool loadData(std::string filename);
-        std::list<FingerPrint> getDiseaseCharacteristics(std::string disease);
-        std::list<std::pair<FingerPrint,std::vector<Diagnosis>>> diagnose(std::string filename);
+        ~Database();
+
+        bool loadMetadata(const std::string & filename);
+        bool loadData(const std::string & filename);
+        std::list<Fingerprint> getDiseaseCharacteristics(const std::string & disease);
+        std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> diagnose(const std::string & filename);
+
     private:
-        void addFingerPrint(FingerPrint fingerprint,std::string disease);
-        std::vector<Diagnosis> diagnose(FingerPrint fingerprint);
+        void addFingerprint(Fingerprint fingerprint, const std::string & disease);
+        std::vector<Diagnosis> diagnose(Fingerprint fingerprint);
+
+        std::unordered_map<std::string, std::list<Fingerprint>> data;
+        Metadata metadata;
 };
 
 #endif // DATABASE_H
