@@ -19,8 +19,15 @@ class FileReader
 
         static Metadata readMetadata(const std::string & filename);
 
+        void affiche();
+
     private:
         std::ifstream file;
+        Metadata metadata;
+        std::vector<int> associatedIndex; //association indices du fichier -> indices de la bdd
+                                          //l'attribut disease est associe a la valeur -1
 };
+
+void afficheMetadonnees(Metadata metadata);
 
 #endif // FILEREADER_H

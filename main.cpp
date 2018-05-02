@@ -4,6 +4,15 @@
 #include "FileReader.h"
 
 int main() {
-    std::cout << "TEST" << std::endl;
+    Metadata m = FileReader::readMetadata("Metadata.txt");
+
+    afficheMetadonnees(m);
+
+    FileReader fr;
+    fr.affiche();
+    fr.open("Data.txt", m);
+    fr.affiche();
+    std::string vide;
+    std::cin >> vide;
     return 0;
 }
