@@ -30,5 +30,6 @@ class FileReader
 };
 
 void afficheMetadonnees(Metadata metadata);
+void afficheVariant(std::variant<std::monostate,bool,int,double,std::string> v);
 
 #endif // FILEREADER_H

@@ -6,6 +6,7 @@
 #include "Metadata.h"
 
 
+
 #include <vector>
 #include <list>
 #include <utility>
@@ -25,6 +26,7 @@ class Database
         bool loadData(const std::string & filename);
         std::list<Fingerprint> getDiseaseCharacteristics(const std::string & disease);
         std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> diagnose(const std::string & filename);
+        void displayDataBase();
 
     private:
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);

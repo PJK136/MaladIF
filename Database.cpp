@@ -1,6 +1,6 @@
 #include "Database.h"
 #include "FileReader.h"
-
+#include <iostream>
 
 bool Database::loadMetadata(const std::string & filename)
 {
@@ -24,13 +24,18 @@ bool Database::loadData(const std::string & filename)
     bool success = fileReader.open(filename,metadata);
 
     if(!success)
+    {
+        std::cerr << "Erreur lors de l'ouverture du fichier" << std::endl;
         return false;
+    }
 
     std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
 
 
-    if(!loadedData.first.values.empty())
+    if(loadedData.first.values.empty())
     {
+        std::cerr << "Fichier vide" << std::endl;
+        std::cerr << "Taille de metadata" << metadata.attributes.size()<< std::endl;
         return false;
     }
 
@@ -47,7 +52,49 @@ bool Database::loadData(const std::string & filename)
 
 void Database::addFingerprint(const Fingerprint & fingerprint, const std::string & disease)
 {
+
     data[disease].push_back(fingerprint);
+}
+
+
+
+void Database::displayDataBase()
+{
+
+    for (const auto & entry : data)
+    {
+        std::cout<< entry.first << " : ";
+        for(const auto & fingerprint : entry.second)
+        {
+            std::cout<<" [";
+            for(const auto & value : fingerprint.values)
+            {
+                std::cout << " ";
+                afficheVariant(value);
+            }
+            std::cout<<" ] ";
+        }
+        std::cout<<std::endl;
+    }
+
+    std::cout << std::endl;
+}
+
+
+std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & disease)
+{
+    auto it = data.find(disease);
+    if(it == data.end())
+    {
+        return {};
+    }
+    return it->second;
+
+}
+
+std::vector<Diagnosis> Database::diagnose(Fingerprint fingerprint)
+{
+
 }
 
 
