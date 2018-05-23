@@ -5,13 +5,13 @@
 #include "FileReader.h"
 
 int main() {
-    Metadata m = FileReader::readMetadata("Metadata.txt");
+    Metadata m = FileReader::readMetadata("metadata3.txt");
 
     afficheMetadonnees(m);
 
     FileReader fr;
     fr.affiche();
-    fr.open("Data.txt", m);
+    std::cout << fr.open("data2.txt", m) << std::endl;
     fr.affiche();
     std::pair<Fingerprint, std::string> fi;
     fi = fr.nextFingerprint();
