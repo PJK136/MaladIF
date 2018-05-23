@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 FileReader::FileReader() :
     file(),
@@ -23,7 +24,7 @@ FileReader::~FileReader()
 bool FileReader::open(const std::string & filename, const Metadata & mdata)
 {
     file.open(filename);
-
+    std::pair<Fingerprint, std::string> nextFingerprint();
     if (!file)
     {
         return false;
@@ -33,6 +34,9 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
 
     std::string line;
     getline(file, line);
+    if (line.back() == '\r') {
+        line.pop_back();
+    }
     std::stringstream sLine(line);
     std::string attribute;
     int i = 0;
@@ -53,7 +57,7 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
             }
             else
             {
-                std::cerr << "Erreur de lecture des données : l'attribut n'existe pas : " << attribute << std::endl;
+                std::cerr << "Erreur de lecture des donnÃ©es : l'attribut n'existe pas : " << attribute << std::endl;
                 associatedIndex.clear();
                 return false;
             }
@@ -70,6 +74,111 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
     metadata.attributesIndex = mdata.attributesIndex;
 
     return true;
+}
+
+std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
+{
+    std::string line;
+    getline(file, line);
+    if (line.empty())
+    {
+        Fingerprint fi;
+        return std::make_pair(fi, "");
+    }
+    if (line.back() == '\r') {
+        line.pop_back();
+    }
+    std::stringstream sLine(line);
+    std::string attribute;
+    std::string disease;
+    Fingerprint fi;
+    fi.values = std::vector(metadata.attributes.size(), std::variant<std::monostate,bool,int,double,std::string>());
+
+    int i = 0;
+
+    while (!sLine.eof())
+    {
+        getline(sLine, attribute, ';');
+        if (associatedIndex[i] == -1)
+        {
+            disease = attribute;
+        }
+        else
+        {
+            if (attribute.empty())
+            {
+                fi.values[associatedIndex[i]] = std::monostate();
+                continue;
+            }
+
+            AttributeType type = metadata.attributes[associatedIndex[i]].type;
+            if (type == ID || type == INT) {
+                try
+                {
+                    fi.values[associatedIndex[i]] = std::stoi(attribute);
+                }
+                catch (const std::invalid_argument & ia)
+                {
+                    std::cerr << "Invalid argument : " << ia.what() << std::endl;
+                    fi.values[associatedIndex[i]] = std::monostate();
+                }
+            } else if (type == BOOLEAN) {
+                if (attribute == "True" || attribute == "true")
+                {
+                    fi.values[associatedIndex[i]] = true;
+                }
+                else if (attribute == "False" || attribute == "false")
+                {
+                    fi.values[associatedIndex[i]] = false;
+                }
+                else
+                {
+                    fi.values[associatedIndex[i]] = std::monostate();
+                }
+            } else if (type == DOUBLE) {
+                try
+                {
+                    fi.values[associatedIndex[i]] = std::stod(attribute);
+                }
+                catch (const std::invalid_argument & ia)
+                {
+                    std::cerr << "Invalid argument : " << ia.what() << std::endl;
+                    fi.values[associatedIndex[i]] = std::monostate();
+                }
+            } else if (type == STRING) {
+                fi.values[associatedIndex[i]] = attribute;
+            }
+        }
+        i++;
+    }
+    return std::make_pair(fi,disease);
+}
+
+void afficheVariant(std::variant<std::monostate,bool,int,double,std::string> v)
+{
+    if (std::holds_alternative<std::monostate>(v)) {
+        std::cout << "monostate";
+    } else if (std::holds_alternative<bool>(v)) {
+        std::cout << std::get<1>(v);
+    } else if (std::holds_alternative<int>(v)) {
+        std::cout << std::get<2>(v);
+    } else if (std::holds_alternative<double>(v)) {
+        std::cout << std::get<3>(v);
+    } else if (std::holds_alternative<std::string>(v)) {
+        std::cout << std::get<4>(v);
+    }
+}
+
+void FileReader::afficherFI(std::pair<Fingerprint, std::string> data)
+{
+    std::cout<<"Maladie : "<<data.second<<std::endl;
+    auto it = data.first.values.begin();
+    while (it != data.first.values.end()) {
+        afficheVariant(*it);
+        std::cout << " | ";
+        it++;
+    }
+    std::cout<<std::endl;
 }
 
 void FileReader::affiche()
@@ -114,9 +223,13 @@ Metadata FileReader::readMetadata(const std::string & filename)
         {
             break;
         }
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
         std::stringstream sLine(line);
         getline(sLine, attributeName, ';');
         getline(sLine, attributeType);
+
         AttributeType type;
 
         if (attributeType == "ID")
@@ -131,7 +244,7 @@ Metadata FileReader::readMetadata(const std::string & filename)
             type = STRING;
         else
         {
-            std::cerr << "Erreur de lecture des métadonnées : type non valide : " << attributeType << std::endl;
+            std::cerr << "Erreur de lecture des mÃ©tadonnÃ©es : type non valide : " << attributeType << std::endl;
             return Metadata();
         }
 
