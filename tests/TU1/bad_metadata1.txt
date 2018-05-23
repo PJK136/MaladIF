@@ -1,0 +1,6 @@
+AtrbuteName;Attrbueype
+abc;sing
+def;D
+ghi;bolan
+jl;doble
+mo;it

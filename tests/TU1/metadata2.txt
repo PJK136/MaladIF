@@ -1,6 +1,6 @@
 AttributeName;AttributeType
-NoID;ID
-A1;string
-A2;double
-A3;double
-A4;double
+abc;string
+def;ID
+ghi;boolean
+jkl;double
+mno;int
