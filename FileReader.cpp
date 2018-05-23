@@ -24,7 +24,6 @@ FileReader::~FileReader()
 bool FileReader::open(const std::string & filename, const Metadata & mdata)
 {
     file.open(filename);
-    std::pair<Fingerprint, std::string> nextFingerprint();
     if (!file)
     {
         return false;
@@ -39,9 +38,9 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
     }
     std::stringstream sLine(line);
     std::string attribute;
-    int i = 0;
+    size_t i = 0;
 
-    while (!sLine.eof())
+    while (!sLine.eof() && i < associatedIndex.size())
     {
         getline(sLine, attribute, ';');
         if (attribute == "Disease")
@@ -65,6 +64,14 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
         i++;
     }
 
+    if (!sLine.eof())
+    {
+        std::cerr << "Erreur de lecture des données : il y a plus d'attributs dans les données que dans les métadonnées." << std::endl;
+        associatedIndex.clear();
+        return false;
+    }
+
+    //Si les données ne contiennent pas de colonne Disease, on peut enlever la place réservée dans associatedIndex
     if (i == mdata.attributes.size())
     {
         associatedIndex.pop_back();
@@ -82,8 +89,7 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
     getline(file, line);
     if (line.empty())
     {
-        Fingerprint fi;
-        return std::make_pair(fi, "");
+        return std::make_pair(Fingerprint(), "");
     }
     if (line.back() == '\r') {
         line.pop_back();
@@ -94,9 +100,9 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
     Fingerprint fi;
     fi.values = std::vector(metadata.attributes.size(), std::variant<std::monostate,bool,int,double,std::string>());
 
-    int i = 0;
+    size_t i = 0;
 
-    while (!sLine.eof())
+    while (!sLine.eof() && i < associatedIndex.size())
     {
         getline(sLine, attribute, ';');
         if (associatedIndex[i] == -1)
@@ -133,6 +139,7 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
                 }
                 else
                 {
+                    std::cerr << "Invalid boolean : " << attribute << std::endl;
                     fi.values[associatedIndex[i]] = std::monostate();
                 }
             } else if (type == DOUBLE) {
@@ -151,6 +158,10 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
         }
         i++;
     }
+
+    if (!sLine.eof())
+        std::cerr << "Erreur de lecture des données : il y a plus d'attributs dans les données que dans les métadonnées." << std::endl;
+
     return std::make_pair(fi,disease);
 }
 
@@ -187,14 +198,14 @@ void FileReader::affiche()
     afficheMetadonnees(metadata);
     std::cout << std::endl;
     std::cout << "AssociatedIndex : " << std::endl;
-    for (int i(0); i < associatedIndex.size(); i++)
+    for (size_t i(0); i < associatedIndex.size(); i++)
         std::cout << associatedIndex[i] << " ";
     std::cout << std::endl;
 }
 
 void afficheMetadonnees(Metadata metadata)
 {
-    for (int i(0); i < metadata.attributes.size(); i++)
+    for (size_t i(0); i < metadata.attributes.size(); i++)
         std::cout << "Case " << i << " : " << metadata.attributes[i].name << " | " << metadata.attributes[i].type << " -> " << metadata.attributesIndex[metadata.attributes[i].name] << std::endl;
 }
 
@@ -212,8 +223,7 @@ Metadata FileReader::readMetadata(const std::string & filename)
 
     std::string attributeName;
     std::string attributeType;
-    int i = 0;
-
+    
     getline(file, line);
 
     while (!file.eof())
@@ -253,9 +263,7 @@ Metadata FileReader::readMetadata(const std::string & filename)
         attribute.type = type;
 
         metadata.attributes.push_back(attribute);
-        metadata.attributesIndex[attributeName] = i;
-
-        i++;
+        metadata.attributesIndex[attributeName] = metadata.attributes.size() - 1;
     }
 
     return metadata;
