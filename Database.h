@@ -5,11 +5,15 @@
 #include "Diagnosis.h"
 #include "Metadata.h"
 
+
 #include <vector>
+#include <list>
 #include <utility>
 #include <string>
 #include <list>
 #include <unordered_map>
+
+
 
 class Database
 {
@@ -23,7 +27,7 @@ class Database
         std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> diagnose(const std::string & filename);
 
     private:
-        void addFingerprint(Fingerprint fingerprint, const std::string & disease);
+        void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);
         std::vector<Diagnosis> diagnose(Fingerprint fingerprint);
 
         std::unordered_map<std::string, std::list<Fingerprint>> data;
