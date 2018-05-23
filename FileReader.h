@@ -20,6 +20,7 @@ class FileReader
         static Metadata readMetadata(const std::string & filename);
 
         void affiche();
+        void afficherFI(std::pair<Fingerprint, std::string> data);
 
     private:
         std::ifstream file;
