@@ -4,16 +4,15 @@
 #include "Fingerprint.h"
 #include "Diagnosis.h"
 #include "Metadata.h"
-#include "FileReader.h"
+
 
 #include <vector>
 #include <list>
 #include <utility>
-#include <functional>
 #include <string>
 #include <list>
 #include <unordered_map>
-#include <iostream>
+
 
 
 class Database

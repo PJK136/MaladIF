@@ -1,28 +1,20 @@
 #include "Database.h"
-
+#include "FileReader.h"
 
 
 bool Database::loadMetadata(const std::string & filename)
 {
-
-    try
+    Metadata metadataTemp = FileReader::readMetadata(filename);
+    if(!metadataTemp.attributes.empty())
     {
-        Metadata metadataTemp = FileReader::readMetadata(filename);
-        if(!metadataTemp.attributes.empty())
-        {
-            metadata = metadataTemp;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        metadata = metadataTemp;
+        return true;
     }
-    catch (const std::exception& e)
+    else
     {
-        std::cerr << e.what();
         return false;
     }
+
 }
 
 
@@ -36,12 +28,11 @@ bool Database::loadData(const std::string & filename)
 
     std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
 
-    //Si c'est vide (ces lignes sont a supprimer au cas ou c'est pris en compte dans open)
+
     if(!loadedData.first.values.empty())
     {
         return false;
     }
-    //--
 
     while(!loadedData.first.values.empty())
     {
