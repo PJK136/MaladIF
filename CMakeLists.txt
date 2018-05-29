@@ -42,7 +42,8 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /W4")
 endif()
 
+include_directories(include)
+add_subdirectory(src)
+
 enable_testing()
 add_subdirectory(tests)
-
-add_executable(MaladIF main.cpp CLI.cpp Database.cpp FileReader.cpp)

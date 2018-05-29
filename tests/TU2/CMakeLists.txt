@@ -1,5 +1,3 @@
-include_directories("${PROJECT_SOURCE_DIR}")
-
 configure_file(../data/metadata1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(../data/metadata_empty.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(../data/metadata3.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
@@ -7,6 +5,6 @@ configure_file(../data/metadata4.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(../data/data1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(../data/data2.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
-add_executable(TU2 TU2.cpp ${PROJECT_SOURCE_DIR}/FileReader.cpp)
+add_executable(TU2 TU2.cpp ${PROJECT_SOURCE_DIR}/src/FileReader.cpp)
 target_link_libraries(TU2 gtest_main)
 add_test(NAME TU2_test COMMAND TU2)
