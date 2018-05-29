@@ -7,6 +7,7 @@
 
 enum AttributeType
 {
+    INVALID,
     ID,
     BOOLEAN,
     INT,
@@ -16,14 +17,14 @@ enum AttributeType
 
 struct Attribute
 {
-    std::string name;
-    AttributeType type;
+    std::string name{};
+    AttributeType type{INVALID};
 };
 
 struct Metadata
 {
-    std::vector<Attribute> attributes;
-    std::unordered_map<std::string, int> attributesIndex;
+    std::vector<Attribute> attributes{};
+    std::unordered_map<std::string, int> attributesIndex{};
 };
 
 #endif // METADATA_H_INCLUDED

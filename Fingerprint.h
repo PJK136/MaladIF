@@ -5,19 +5,21 @@
 #include <variant>
 #include <string>
 
+typedef std::variant<std::monostate,bool,int,double,std::string> FingerprintValue;
+
 struct Fingerprint
 {
-    std::vector<std::variant<std::monostate,bool,int,double,std::string>> values;
+    std::vector<FingerprintValue> values{};
 };
 
-inline bool operator==(Fingerprint const& f1, Fingerprint const& f2)
+inline bool operator==(const Fingerprint &f1, const Fingerprint &f2)
 {
-    if(f1.values.size() != f2.values.size())
+    if (f1.values.size() != f2.values.size())
     {
         return false;
     }
 
-    for (int i=0; i<f1.values.size(); i++)
+    for (size_t i=0; i<f1.values.size(); i++)
     {
         if(f1.values[i] != f2.values[i])
         {

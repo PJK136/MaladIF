@@ -165,49 +165,16 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
     return std::make_pair(fi,disease);
 }
 
-void afficheVariant(std::variant<std::monostate,bool,int,double,std::string> v)
-{
-    if (std::holds_alternative<std::monostate>(v)) {
-        std::cout << "monostate";
-    } else if (std::holds_alternative<bool>(v)) {
-        std::cout << std::get<1>(v);
-    } else if (std::holds_alternative<int>(v)) {
-        std::cout << std::get<2>(v);
-    } else if (std::holds_alternative<double>(v)) {
-        std::cout << std::get<3>(v);
-    } else if (std::holds_alternative<std::string>(v)) {
-        std::cout << std::get<4>(v);
-    }
-}
-
-void FileReader::afficherFI(std::pair<Fingerprint, std::string> data)
-{
-    std::cout<<"Maladie : "<<data.second<<std::endl;
-    auto it = data.first.values.begin();
-    while (it != data.first.values.end()) {
-        afficheVariant(*it);
-        std::cout << " | ";
-        it++;
-    }
-    std::cout<<std::endl;
-}
-
+/* TODO : à enlever
 void FileReader::affiche()
 {
-    std::cout << "Metadata : " << std::endl;
-    afficheMetadonnees(metadata);
+    std::cout << "Metadata : " << metadata << std::endl;
     std::cout << std::endl;
     std::cout << "AssociatedIndex : " << std::endl;
     for (size_t i(0); i < associatedIndex.size(); i++)
         std::cout << associatedIndex[i] << " ";
     std::cout << std::endl;
-}
-
-void afficheMetadonnees(Metadata metadata)
-{
-    for (size_t i(0); i < metadata.attributes.size(); i++)
-        std::cout << "Case " << i << " : " << metadata.attributes[i].name << " | " << metadata.attributes[i].type << " -> " << metadata.attributesIndex[metadata.attributes[i].name] << std::endl;
-}
+}*/
 
 Metadata FileReader::readMetadata(const std::string & filename)
 {

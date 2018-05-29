@@ -19,8 +19,7 @@ class FileReader
 
         static Metadata readMetadata(const std::string & filename);
 
-        void affiche();
-        void afficherFI(std::pair<Fingerprint, std::string> data);
+        //void affiche();
 
     private:
         std::ifstream file;
@@ -28,8 +27,5 @@ class FileReader
         std::vector<int> associatedIndex; //association indices du fichier -> indices de la bdd
                                           //l'attribut disease est associe a la valeur -1
 };
-
-void afficheMetadonnees(Metadata metadata);
-void afficheVariant(std::variant<std::monostate,bool,int,double,std::string> v);
 
 #endif // FILEREADER_H

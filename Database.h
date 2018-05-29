@@ -14,8 +14,6 @@
 #include <list>
 #include <unordered_map>
 
-
-
 class Database
 {
     public:
@@ -30,7 +28,7 @@ class Database
 
     private:
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);
-        std::vector<Diagnosis> diagnose(Fingerprint fingerprint);
+        std::vector<Diagnosis> diagnose(const Fingerprint & fingerprint);
 
         std::unordered_map<std::string, std::list<Fingerprint>> data;
         Metadata metadata;

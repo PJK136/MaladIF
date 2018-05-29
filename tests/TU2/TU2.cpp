@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 
 TEST(TU2,a) {
-    Metadata metadata(FileReader::readMetadata("metadata.txt"));
+    Metadata metadata(FileReader::readMetadata("metadata1.txt"));
     FileReader fr;
     bool open(fr.open("data2.txt",metadata));
     ASSERT_TRUE(open);
@@ -42,7 +42,7 @@ TEST(TU2,b1) {
 }
 
 TEST(TU2,b2) {
-    Metadata metadata(FileReader::readMetadata("metadataVIDE.txt"));
+    Metadata metadata(FileReader::readMetadata("metadata_empty.txt"));
     FileReader fr;
     bool open(fr.open("data2.txt",metadata));
     ASSERT_FALSE(open);

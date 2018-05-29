@@ -51,13 +51,13 @@ TEST(TU1, a2) {
 }
 
 TEST(TU1, b1) {
-    Metadata metadata(FileReader::readMetadata("bad_metadata1.txt"));
+    Metadata metadata(FileReader::readMetadata("metadata_bad1.txt"));
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
 TEST(TU1, b2) {
-    Metadata metadata(FileReader::readMetadata("bad_metadata2.txt"));
+    Metadata metadata(FileReader::readMetadata("metadata_bad2.txt"));
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }

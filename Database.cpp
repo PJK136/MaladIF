@@ -1,5 +1,6 @@
 #include "Database.h"
 #include "FileReader.h"
+#include "CLI.h"
 #include <iostream>
 
 bool Database::loadMetadata(const std::string & filename)
@@ -46,18 +47,14 @@ bool Database::loadData(const std::string & filename)
     }
 
     return true;
-
-
 }
 
 void Database::addFingerprint(const Fingerprint & fingerprint, const std::string & disease)
 {
-
     data[disease].push_back(fingerprint);
 }
 
-
-
+//TOOD : À déplacer
 void Database::displayDataBase()
 {
 
@@ -69,8 +66,7 @@ void Database::displayDataBase()
             std::cout<<" [";
             for(const auto & value : fingerprint.values)
             {
-                std::cout << " ";
-                afficheVariant(value);
+                std::cout << " " << value;
             }
             std::cout<<" ] ";
         }
@@ -84,21 +80,16 @@ void Database::displayDataBase()
 std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & disease)
 {
     auto it = data.find(disease);
-    if(it == data.end())
-    {
-        return {};
-    }
-    return it->second;
-
+    return it != data.end() ? it->second : std::list<Fingerprint>{};
 }
 
-std::vector<Diagnosis> Database::diagnose(Fingerprint fingerprint)
+std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint)
 {
-
+    return {};
 }
 
 
-Database::Database()
+Database::Database() : data(), metadata()
 {
     //ctor
 }
