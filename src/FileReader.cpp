@@ -24,7 +24,7 @@ FileReader::~FileReader()
 bool FileReader::open(const std::string & filename, const Metadata & mdata)
 {
     file.open(filename);
-    if (!file)
+    if (!file || file.eof())
     {
         return false;
     }
@@ -114,46 +114,47 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
             if (attribute.empty())
             {
                 fi.values[associatedIndex[i]] = std::monostate();
-                continue;
             }
-
-            AttributeType type = metadata.attributes[associatedIndex[i]].type;
-            if (type == ID || type == INT) {
-                try
-                {
-                    fi.values[associatedIndex[i]] = std::stoi(attribute);
+            else
+            {
+                AttributeType type = metadata.attributes[associatedIndex[i]].type;
+                if (type == ID || type == INT) {
+                    try
+                    {
+                        fi.values[associatedIndex[i]] = std::stoi(attribute);
+                    }
+                    catch (const std::invalid_argument & ia)
+                    {
+                        std::cerr << "Invalid argument : " << ia.what() << std::endl;
+                        fi.values[associatedIndex[i]] = std::monostate();
+                    }
+                } else if (type == BOOLEAN) {
+                    if (attribute == "True" || attribute == "true")
+                    {
+                        fi.values[associatedIndex[i]] = true;
+                    }
+                    else if (attribute == "False" || attribute == "false")
+                    {
+                        fi.values[associatedIndex[i]] = false;
+                    }
+                    else
+                    {
+                        std::cerr << "Invalid boolean : " << attribute << std::endl;
+                        fi.values[associatedIndex[i]] = std::monostate();
+                    }
+                } else if (type == DOUBLE) {
+                    try
+                    {
+                        fi.values[associatedIndex[i]] = std::stod(attribute);
+                    }
+                    catch (const std::invalid_argument & ia)
+                    {
+                        std::cerr << "Invalid argument : " << ia.what() << std::endl;
+                        fi.values[associatedIndex[i]] = std::monostate();
+                    }
+                } else if (type == STRING) {
+                    fi.values[associatedIndex[i]] = attribute;
                 }
-                catch (const std::invalid_argument & ia)
-                {
-                    std::cerr << "Invalid argument : " << ia.what() << std::endl;
-                    fi.values[associatedIndex[i]] = std::monostate();
-                }
-            } else if (type == BOOLEAN) {
-                if (attribute == "True" || attribute == "true")
-                {
-                    fi.values[associatedIndex[i]] = true;
-                }
-                else if (attribute == "False" || attribute == "false")
-                {
-                    fi.values[associatedIndex[i]] = false;
-                }
-                else
-                {
-                    std::cerr << "Invalid boolean : " << attribute << std::endl;
-                    fi.values[associatedIndex[i]] = std::monostate();
-                }
-            } else if (type == DOUBLE) {
-                try
-                {
-                    fi.values[associatedIndex[i]] = std::stod(attribute);
-                }
-                catch (const std::invalid_argument & ia)
-                {
-                    std::cerr << "Invalid argument : " << ia.what() << std::endl;
-                    fi.values[associatedIndex[i]] = std::monostate();
-                }
-            } else if (type == STRING) {
-                fi.values[associatedIndex[i]] = attribute;
             }
         }
         i++;
@@ -161,6 +162,13 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
 
     if (!sLine.eof())
         std::cerr << "Erreur de lecture des données : il y a plus d'attributs dans les données que dans les métadonnées." << std::endl;
+
+    if (sLine.eof() && i < associatedIndex.size())
+    {
+        std::cerr << "Erreur de lecture des données : ..." << std::endl;
+        associatedIndex.clear();
+        return std::make_pair(Fingerprint(), "");
+    }
 
     return std::make_pair(fi,disease);
 }
@@ -190,7 +198,7 @@ Metadata FileReader::readMetadata(const std::string & filename)
 
     std::string attributeName;
     std::string attributeType;
-    
+
     getline(file, line);
 
     while (!file.eof())
