@@ -30,9 +30,15 @@ FileReader::~FileReader()
 bool FileReader::open(const std::string & filename, const Metadata & mdata)
 {
     file.open(filename);
-    if (!file || file.eof())
+    if (!file)
     {
         err = CANT_OPEN;
+        return false;
+    }
+
+    if (file.eof())
+    {
+        err = EMPTY;
         return false;
     }
 
@@ -99,7 +105,8 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
     getline(file, line);
     if (line.empty())
     {
-        return std::make_pair(Fingerprint(), "");
+        err = EMPTY;
+        return {};
     }
     if (line.back() == '\r') {
         line.pop_back();
@@ -158,6 +165,7 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
 #ifndef NDEBUG
                     std::cerr << "Invalid argument : " << ia.what() << std::endl;
 #endif
+                    return {};
                 }
             }
         }
@@ -169,11 +177,9 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
 
     if (sLine.eof() && i < associatedIndex.size())
     {
-#ifndef NDEBUG
-        std::cerr << "Erreur de lecture des données : ..." << std::endl;
-#endif
+        err = ATTRIBUTES_MISSING;
         associatedIndex.clear();
-        return std::make_pair(Fingerprint(), "");
+        return {};
     }
 
     return std::make_pair(fi,disease);
