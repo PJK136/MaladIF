@@ -33,6 +33,12 @@ int main() {
     std::cout<<succ<<std::endl;
     database.displayDataBase();
 
+    std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> results = database.diagnose("data2.txt");
+    for (const auto & result : results)
+    {
+        std::cout << "--> [" << result.first << "] :" << std::endl << result.second << std::endl;
+    }
+
 //    Fingerprint fp;
 //    fp.values = {1, std::string("True"), 2.12, 13.0, 3.156, 1236, true};
 //    std::cout << "match : " << database.fingerprintMatch(fp, fp) << std::endl;

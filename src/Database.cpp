@@ -133,6 +133,38 @@ std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & d
     return it != data.end() ? it->second : std::list<Fingerprint>{};
 }
 
+std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(const std::string & filename) const
+{
+    std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> result;
+
+    FileReader fileReader;
+    bool success = fileReader.open(filename, metadata);
+
+    if(!success)
+    {
+        std::cerr << "Erreur lors de l'ouverture du fichier" << std::endl;
+        return result;
+    }
+
+    std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
+
+    if(loadedData.first.values.empty())
+    {
+        std::cerr << "Fichier vide" << std::endl;
+        std::cerr << "Taille de metadata" << metadata.attributes.size()<< std::endl;
+        return result;
+    }
+
+    while(!loadedData.first.values.empty())
+    {
+        std::vector<Diagnosis> diagList = diagnose(loadedData.first);
+        result.push_back(std::make_pair(loadedData.first, diagList));
+        loadedData = fileReader.nextFingerprint();
+    }
+
+    return result;
+}
+
 std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
 {
     std::vector<Diagnosis> diagnosisList;
