@@ -1,0 +1,10 @@
+configure_file(../data/metadata1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/metadata2.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/metadata3.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/metadata4.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/metadata_bad1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/metadata_bad2.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+
+add_executable(TU3 TU3.cpp ${PROJECT_SOURCE_DIR}/src/Database.cpp ${PROJECT_SOURCE_DIR}/src/FileReader.cpp)
+target_link_libraries(TU3 gtest_main)
+add_test(NAME TU3_test COMMAND TU3)
