@@ -208,8 +208,18 @@ Metadata FileReader::readMetadata(const std::string & filename)
 
     std::string attributeName;
     std::string attributeType;
-    
+
     getline(file, line);
+
+    if (line.empty()) {
+        getline(file, line);
+        if (file.eof())
+            metadataErr = EMPTY;
+        else
+            metadataErr = UNKNOWN_ATTRIBUTE;
+
+        return metadata;
+    }
 
     while (!file.eof())
     {
