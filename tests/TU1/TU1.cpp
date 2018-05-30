@@ -3,6 +3,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+//test avec un fichier correct
 TEST(TU1, a1) {
     Metadata metadata(FileReader::readMetadata("metadata1.txt"));
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::OK);
@@ -29,6 +30,7 @@ TEST(TU1, a1) {
     EXPECT_EQ(metadata.attributesIndex["AZ51"], 5);
 }
 
+//test avec un fichier correct
 TEST(TU1, a2) {
     Metadata metadata(FileReader::readMetadata("metadata2.txt"));
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::OK);
@@ -52,6 +54,7 @@ TEST(TU1, a2) {
     EXPECT_EQ(metadata.attributesIndex["mno"], 4);
 }
 
+//fichier avec des types invalides
 TEST(TU1, b1) {
     Metadata metadata(FileReader::readMetadata("metadata_bad1.txt"));
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::INVALID_TYPE);
@@ -59,6 +62,7 @@ TEST(TU1, b1) {
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
+//le fichier n'est pas lisible
 TEST(TU1, b2) {
     Metadata metadata(FileReader::readMetadata("metadata_bad2.txt"));
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::INVALID_TYPE);
@@ -66,6 +70,15 @@ TEST(TU1, b2) {
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
+//le fichier est vide
+TEST(TU1, b3) {
+    Metadata metadata(FileReader::readMetadata("empty.txt"));
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::EMPTY);
+    EXPECT_TRUE(metadata.attributes.empty());
+    EXPECT_TRUE(metadata.attributesIndex.empty());
+}
+
+//le fichier n'existe pas
 TEST(TU1, c1) {
     Metadata metadata(FileReader::readMetadata(""));
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
@@ -73,6 +86,7 @@ TEST(TU1, c1) {
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
+//nom du fichier invalide
 TEST(TU1, c2) {
     Metadata metadata = FileReader::readMetadata("565e034b-6f73-4c0a-9b2d-dee4aae760eb.zer");
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
@@ -80,6 +94,7 @@ TEST(TU1, c2) {
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
+//nom du fichier mal formé
 TEST(TU1, c3) {
     Metadata metadata = FileReader::readMetadata("sdqf sdfjmlksqdf ~#{ßë‘dùmqélmùlé'mùlsflsdf");
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
@@ -87,6 +102,7 @@ TEST(TU1, c3) {
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
+//nom du fichier mal formé
 TEST(TU1, c4) {
     Metadata metadata = FileReader::readMetadata("..");
     EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
