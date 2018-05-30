@@ -28,6 +28,21 @@ class CLI
         Database database;
 };
 
+inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis)
+{
+    stream << "Disease : " << diagnosis.disease << "; risk : " << diagnosis.risk * 100 << "%";
+    return stream;
+}
+
+inline std::ostream &operator<<(std::ostream &stream, const std::vector<Diagnosis> &diagnosisList)
+{
+    for (const Diagnosis &diagnosis : diagnosisList)
+    {
+        stream << diagnosis << std::endl;
+    }
+    return stream;
+}
+
 inline std::ostream &operator<<(std::ostream &stream, const Metadata &metadata)
 {
     for (size_t i(0); i < metadata.attributes.size(); i++)
