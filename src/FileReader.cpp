@@ -27,18 +27,15 @@ FileReader::~FileReader()
 #endif // NDEBUG
 }
 
-bool FileReader::open(const std::string & filename, const Metadata & mdata)
-{
-    file.open(filename);
-    if (!file)
-    {
-        err = CANT_OPEN;
+bool FileReader::open(const std::string & filename, const Metadata & mdata) {
+    if (mdata.attributes.empty()) {
+        err = NO_METADATA;
         return false;
     }
 
-    if (file.eof())
-    {
-        err = EMPTY;
+    file.open(filename);
+    if (!file) {
+        err = CANT_OPEN;
         return false;
     }
 
@@ -46,6 +43,17 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
 
     std::string line;
     getline(file, line);
+
+    if (line.empty()) {
+        getline(file, line);
+        if (file.eof())
+            err = EMPTY;
+        else
+            err = UNKNOWN_ATTRIBUTE;
+
+        return false;
+    }
+
     if (line.back() == '\r') {
         line.pop_back();
     }

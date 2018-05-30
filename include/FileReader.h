@@ -14,10 +14,13 @@ class FileReader
         enum Error {
             OK,
             CANT_OPEN,
+            EMPTY,
             UNKNOWN_ATTRIBUTE,
+            ATTRIBUTES_MISSING,
             TOO_MANY_ATTRIBUTES,
             INVALID_VALUE,
-            INVALID_TYPE
+            INVALID_TYPE,
+            NO_METADATA
         };
 
         FileReader();
