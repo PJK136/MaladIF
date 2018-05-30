@@ -3,7 +3,7 @@
 
 struct Diagnosis
 {
-    std::string disease;
+    std::string disease{};
     double risk = 0.;
 };
 
