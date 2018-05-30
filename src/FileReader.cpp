@@ -1,24 +1,30 @@
 #include "FileReader.h"
 
 #include <sstream>
-#include <iostream>
 #include <vector>
 
+#ifndef NDEBUG
+    #include <iostream>
+#endif
+
+FileReader::Error FileReader::metadataErr = OK;
+
 FileReader::FileReader() :
+    err(OK),
     file(),
     metadata(),
     associatedIndex()
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     std::cerr << "Appel au constructeur de FileReader" << std::endl;
-#endif // DEBUG
+#endif // NDEBUG
 }
 
 FileReader::~FileReader()
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     std::cerr << "Appel au destructeur de FileReader" << std::endl;
-#endif // DEBUG
+#endif // NDEBUG
 }
 
 bool FileReader::open(const std::string & filename, const Metadata & mdata)
@@ -26,6 +32,7 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
     file.open(filename);
     if (!file || file.eof())
     {
+        err = CANT_OPEN;
         return false;
     }
 
@@ -56,7 +63,10 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
             }
             else
             {
-                std::cerr << "Erreur de lecture des données : l'attribut n'existe pas : " << attribute << std::endl;
+                err = UNKNOWN_ATTRIBUTE;
+#ifndef NDEBUG
+                std::cerr << "L'attribut suivant n'existe pas : " << attribute << std::endl;
+#endif
                 associatedIndex.clear();
                 return false;
             }
@@ -66,7 +76,7 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
 
     if (!sLine.eof())
     {
-        std::cerr << "Erreur de lecture des données : il y a plus d'attributs dans les données que dans les métadonnées." << std::endl;
+        err = TOO_MANY_ATTRIBUTES;
         associatedIndex.clear();
         return false;
     }
@@ -118,42 +128,36 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
             else
             {
                 AttributeType type = metadata.attributes[associatedIndex[i]].type;
-                if (type == ID || type == INT) {
-                    try
-                    {
-                        fi.values[associatedIndex[i]] = std::stoi(attribute);
-                    }
-                    catch (const std::invalid_argument & ia)
-                    {
-                        std::cerr << "Invalid argument : " << ia.what() << std::endl;
-                        fi.values[associatedIndex[i]] = std::monostate();
-                    }
-                } else if (type == BOOLEAN) {
-                    if (attribute == "True" || attribute == "true")
-                    {
-                        fi.values[associatedIndex[i]] = true;
-                    }
-                    else if (attribute == "False" || attribute == "false")
-                    {
-                        fi.values[associatedIndex[i]] = false;
-                    }
-                    else
-                    {
-                        std::cerr << "Invalid boolean : " << attribute << std::endl;
-                        fi.values[associatedIndex[i]] = std::monostate();
-                    }
-                } else if (type == DOUBLE) {
-                    try
-                    {
+                try
+                {
+                    if (type == ID || type == INT) {
+                            fi.values[associatedIndex[i]] = std::stoi(attribute);
+                    } else if (type == BOOLEAN) {
+                        if (attribute == "True" || attribute == "true")
+                        {
+                            fi.values[associatedIndex[i]] = true;
+                        }
+                        else if (attribute == "False" || attribute == "false")
+                        {
+                            fi.values[associatedIndex[i]] = false;
+                        }
+                        else
+                        {
+                            throw std::invalid_argument(attribute);
+                        }
+                    } else if (type == DOUBLE) {
                         fi.values[associatedIndex[i]] = std::stod(attribute);
+                    } else if (type == STRING) {
+                        fi.values[associatedIndex[i]] = attribute;
                     }
-                    catch (const std::invalid_argument & ia)
-                    {
-                        std::cerr << "Invalid argument : " << ia.what() << std::endl;
-                        fi.values[associatedIndex[i]] = std::monostate();
-                    }
-                } else if (type == STRING) {
-                    fi.values[associatedIndex[i]] = attribute;
+                }
+                catch (const std::invalid_argument &ia)
+                {
+                    err = INVALID_VALUE;
+                    fi.values[associatedIndex[i]] = std::monostate();
+#ifndef NDEBUG
+                    std::cerr << "Invalid argument : " << ia.what() << std::endl;
+#endif
                 }
             }
         }
@@ -161,28 +165,19 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
     }
 
     if (!sLine.eof())
-        std::cerr << "Erreur de lecture des données : il y a plus d'attributs dans les données que dans les métadonnées." << std::endl;
+        err = TOO_MANY_ATTRIBUTES;
 
     if (sLine.eof() && i < associatedIndex.size())
     {
+#ifndef NDEBUG
         std::cerr << "Erreur de lecture des données : ..." << std::endl;
+#endif
         associatedIndex.clear();
         return std::make_pair(Fingerprint(), "");
     }
 
     return std::make_pair(fi,disease);
 }
-
-/* TODO : à enlever
-void FileReader::affiche()
-{
-    std::cout << "Metadata : " << metadata << std::endl;
-    std::cout << std::endl;
-    std::cout << "AssociatedIndex : " << std::endl;
-    for (size_t i(0); i < associatedIndex.size(); i++)
-        std::cout << associatedIndex[i] << " ";
-    std::cout << std::endl;
-}*/
 
 Metadata FileReader::readMetadata(const std::string & filename)
 {
@@ -191,6 +186,7 @@ Metadata FileReader::readMetadata(const std::string & filename)
 
     if (!file)
     {
+        metadataErr = CANT_OPEN;
         return metadata;
     }
 
@@ -198,7 +194,7 @@ Metadata FileReader::readMetadata(const std::string & filename)
 
     std::string attributeName;
     std::string attributeType;
-
+    
     getline(file, line);
 
     while (!file.eof())
@@ -229,7 +225,10 @@ Metadata FileReader::readMetadata(const std::string & filename)
             type = STRING;
         else
         {
+            metadataErr = INVALID_TYPE;
+#ifndef NDEBUG
             std::cerr << "Erreur de lecture des métadonnées : type non valide : " << attributeType << std::endl;
+#endif
             return Metadata();
         }
 

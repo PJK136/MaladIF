@@ -5,6 +5,7 @@
 
 TEST(TU1, a1) {
     Metadata metadata(FileReader::readMetadata("metadata1.txt"));
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::OK);
     ASSERT_FALSE(metadata.attributes.empty());
     ASSERT_FALSE(metadata.attributesIndex.empty());
     EXPECT_EQ(metadata.attributes.size(), metadata.attributesIndex.size());
@@ -30,6 +31,7 @@ TEST(TU1, a1) {
 
 TEST(TU1, a2) {
     Metadata metadata(FileReader::readMetadata("metadata2.txt"));
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::OK);
     ASSERT_FALSE(metadata.attributes.empty());
     ASSERT_FALSE(metadata.attributesIndex.empty());
     EXPECT_EQ(metadata.attributes.size(), metadata.attributesIndex.size());
@@ -52,30 +54,42 @@ TEST(TU1, a2) {
 
 TEST(TU1, b1) {
     Metadata metadata(FileReader::readMetadata("metadata_bad1.txt"));
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::INVALID_TYPE);
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
 TEST(TU1, b2) {
     Metadata metadata(FileReader::readMetadata("metadata_bad2.txt"));
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::INVALID_TYPE);
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
 TEST(TU1, c1) {
     Metadata metadata(FileReader::readMetadata(""));
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
 TEST(TU1, c2) {
     Metadata metadata = FileReader::readMetadata("565e034b-6f73-4c0a-9b2d-dee4aae760eb.zer");
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
 
 TEST(TU1, c3) {
     Metadata metadata = FileReader::readMetadata("sdqf sdfjmlksqdf ~#{ßë‘dùmqélmùlé'mùlsflsdf");
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
+    EXPECT_TRUE(metadata.attributes.empty());
+    EXPECT_TRUE(metadata.attributesIndex.empty());
+}
+
+TEST(TU1, c4) {
+    Metadata metadata = FileReader::readMetadata("..");
+    EXPECT_EQ(FileReader::metadataError(), FileReader::Error::CANT_OPEN);
     EXPECT_TRUE(metadata.attributes.empty());
     EXPECT_TRUE(metadata.attributesIndex.empty());
 }
