@@ -201,6 +201,9 @@ Metadata FileReader::readMetadata(const std::string & filename)
     if (!file)
     {
         metadataErr = CANT_OPEN;
+        #ifndef NDEBUG
+        std::cerr << "Impossible d'ouvrir" << std::endl;
+        #endif // NDEBUG
         return metadata;
     }
 
@@ -217,7 +220,9 @@ Metadata FileReader::readMetadata(const std::string & filename)
             metadataErr = EMPTY;
         else
             metadataErr = UNKNOWN_ATTRIBUTE;
-
+        #ifndef NDEBUG
+        std::cerr << "line empty" << std::endl;
+        #endif // NDEBUG
         return metadata;
     }
 

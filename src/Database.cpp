@@ -8,7 +8,9 @@ constexpr double EPSILON = 0.5;
 bool Database::loadMetadata(const std::string & filename)
 {
     Metadata metadataTemp = FileReader::readMetadata(filename);
-    if(!metadataTemp.attributes.empty())
+    setError(FileReader::metadataError());
+
+    if(!FileReader::metadataError())
     {
         metadata = metadataTemp;
         fingerprintMax.values.resize(metadata.attributes.size());
@@ -35,19 +37,18 @@ bool Database::loadData(const std::string & filename)
 {
     FileReader fileReader;
     bool success = fileReader.open(filename,metadata);
+    setError(fileReader.error());
 
     if(!success)
     {
-        std::cerr << "Erreur lors de l'ouverture du fichier" << std::endl;
         return false;
     }
 
     std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
+    setError(fileReader.error());
 
-    if(loadedData.first.values.empty())
+    if(fileReader.error())
     {
-        std::cerr << "Fichier vide" << std::endl;
-        std::cerr << "Taille de metadata" << metadata.attributes.size()<< std::endl;
         return false;
     }
 
@@ -55,6 +56,11 @@ bool Database::loadData(const std::string & filename)
     {
         addFingerprint(loadedData.first,loadedData.second);
         loadedData = fileReader.nextFingerprint();
+        setError(fileReader.error());
+        if (fileReader.error() != FileReader::Error::OK && fileReader.error() != FileReader::Error::EMPTY)
+        {
+            return false;
+        }
     }
 
     return true;
@@ -129,37 +135,64 @@ void Database::displayDataBase()
 
 std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & disease) const
 {
+    if (data.empty())
+    {
+        err = Database::Error::NO_DATA;
+        return std::list<Fingerprint>{};
+    }
+
     auto it = data.find(disease);
-    return it != data.end() ? it->second : std::list<Fingerprint>{};
+    if (it != data.end())
+    {
+        err = Database::Error::OK;
+        return it->second;
+    }
+
+    err = Database::Error::NOT_FOUND;
+    return std::list<Fingerprint>{};
 }
 
 std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(const std::string & filename) const
 {
     std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> result;
 
+    if (data.empty())
+    {
+        err = Database::Error::NO_DATA;
+        return result;
+    }
+
     FileReader fileReader;
     bool success = fileReader.open(filename, metadata);
+    setError(fileReader.error());
 
     if(!success)
     {
-        std::cerr << "Erreur lors de l'ouverture du fichier" << std::endl;
         return result;
     }
 
     std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
+    setError(fileReader.error());
 
-    if(loadedData.first.values.empty())
+    if(fileReader.error())
     {
-        std::cerr << "Fichier vide" << std::endl;
-        std::cerr << "Taille de metadata" << metadata.attributes.size()<< std::endl;
         return result;
     }
 
     while(!loadedData.first.values.empty())
     {
         std::vector<Diagnosis> diagList = diagnose(loadedData.first);
+        if (err)
+        {
+            return result;
+        }
         result.push_back(std::make_pair(loadedData.first, diagList));
         loadedData = fileReader.nextFingerprint();
+        setError(fileReader.error());
+        if (fileReader.error() != FileReader::Error::OK && fileReader.error() != FileReader::Error::EMPTY)
+        {
+            return result;
+        }
     }
 
     return result;
@@ -167,13 +200,27 @@ std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(cons
 
 std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
 {
+    #ifndef NDEBUG
+    std::cout << "diagnose : " << fingerprint << std::endl;
+    #endif // NDEBUG
     std::vector<Diagnosis> diagnosisList;
     for (const auto & kv : data)
     {
         std::vector<double> values;
         for (const auto & fingerprintDB : kv.second)
         {
-            values.push_back(fingerprintMatch(fingerprint, fingerprintDB));
+            #ifndef NDEBUG
+            std::cout << "on match avec : " << fingerprintDB << std::endl;
+            #endif // NDEBUG
+            double matchingValue = fingerprintMatch(fingerprint, fingerprintDB);
+            #ifndef NDEBUG
+            std::cout << "fini" << std::endl;
+            #endif // NDEBUG
+            if (err)
+            {
+                return std::vector<Diagnosis>{};
+            }
+            values.push_back(matchingValue);
         }
         double sum = 0.;
         for (double value : values)
@@ -190,7 +237,16 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
 
 double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2) const
 {
+
     Fingerprint diff = fp1 - fp2;
+    #ifndef NDEBUG
+    std::cout << "le diff a fonctionne" << std::endl;
+    #endif // NDEBUG
+    if (diff.values.empty())
+    {
+        err = Database::Error::INVALID;
+        return 0.;
+    }
     double sum = 0.;
     size_t size = diff.values.size();
     for (size_t i = 0; i < diff.values.size(); ++i)
@@ -198,7 +254,13 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
         if (diff.values[i].index() != 0 && metadata.attributes[i].type != ID)
         {
             double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : (double) std::get<int>(diff.values[i]));
+            #ifndef NDEBUG
+            std::cout << "fonctionne pour diff" << std::endl;
+            #endif // NDEBUG
             double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : (double) std::get<int>(fingerprintEtendue.values[i]);
+            #ifndef NDEBUG
+            std::cout << "fonctionne pour etendue" << std::endl;
+            #endif // NDEBUG
             if ((val / etendue) < EPSILON)
             {
                 sum += 1.;
@@ -209,10 +271,33 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
             size -= 1;
         }
     }
+    err = Database::Error::OK;
     return (sum / size);
 }
 
-Database::Database() : data(), metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue()
+void Database::setError(FileReader::Error frErr) const
+{
+    switch (frErr)
+    {
+    case FileReader::OK :
+        err = Database::Error::OK;
+        break;
+    case FileReader::CANT_OPEN :
+        err = Database::Error::CANT_OPEN;
+        break;
+    case FileReader::EMPTY :
+        err = Database::Error::EMPTY_FILE;
+        break;
+    case FileReader::NO_METADATA :
+        err = Database::Error::NO_METADATA;
+        break;
+    default :
+        err = Database::Error::INVALID;
+        break;
+    }
+}
+
+Database::Database() : err(Database::Error::OK), data(), metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue()
 {
     //ctor
 }
