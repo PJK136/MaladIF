@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "CLI.h"
-#include "CLI.h"
 #include "Database.h"
 
 int main() {
@@ -23,6 +22,7 @@ int main() {
     std::string vide;
     std::cin >> vide;*/
 
+    /*
     Database database;
     bool success = database.loadMetadata("metadata1.txt");
     std::cout<<"avant charg"<<std::endl;
@@ -38,12 +38,17 @@ int main() {
     {
         std::cout << "--> [" << result.first << "] :" << std::endl << result.second << std::endl;
     }
+    */
+
 
 //    Fingerprint fp;
 //    fp.values = {1, std::string("True"), 2.12, 13.0, 3.156, 1236, true};
 //    std::cout << "match : " << database.fingerprintMatch(fp, fp) << std::endl;
 //    std::vector<Diagnosis> diag = database.diagnose(fp);
 //    std::cout << diag << std::endl;
+
+    CLI cli;
+    cli.execute();
 
     return 0;
 }
