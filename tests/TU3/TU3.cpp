@@ -62,5 +62,60 @@ TEST(TU3, b6) {
 TEST(TU3, b7) {
    Database database;
    ASSERT_FALSE(database.loadMetadata("empty.txt"));
-
 }
+
+//fichiers de métadonnées et de données valides
+TEST(TU3, c) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_TRUE(database.loadData("data1.txt"));
+}
+
+//le fichier de données est vide
+TEST(TU3, d1) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_FALSE(database.loadData("empty.txt"));
+}
+
+//fichier de données inexistant
+TEST(TU3, d2) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_FALSE(database.loadData("doesntExist.txt"));
+}
+
+//ficher de données avec un nom incorrect
+TEST(TU3, d3) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_FALSE(database.loadData("jmlksqdf ~#{."));
+}
+
+//ficher de données invalide car nombre de caractéristiques renseignées invalide
+TEST(TU3, d4) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_FALSE(database.loadData("data_bad2.txt"));
+}
+
+//ficher de données invalide car caractères non lisibles
+TEST(TU3, d5) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_FALSE(database.loadData("data_bad1.txt"));
+}
+
+//ficher de données invalide car renseigne un attribut non renseigné dans les métadonnées
+TEST(TU3, d6) {
+    Database database;
+    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
+    ASSERT_FALSE(database.loadData("data_bad3.txt"));
+}
+
+//chargement des données sans avoir charger les métadonnées
+TEST(TU3, e) {
+Database database;
+    ASSERT_FALSE(database.loadData("data1.txt"));
+}
+

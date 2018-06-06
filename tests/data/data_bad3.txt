@@ -1,0 +1,5 @@
+NoID;A1;A2;A3;A4;AZ51;EnPlus;Disease
+1;True;2.12;13;12.59;1;False;
+1;True;2.12;13;3.156;1236;False;Maladie2
+2;False;1.1;14.3;13.2;2367;True;
+3;None;12;145;;11;True;Maladie1

@@ -58,7 +58,7 @@ TEST(TU2,b2) {
 TEST(TU2,b3) {
     Metadata metadata(FileReader::readMetadata("metadata3.txt"));
     FileReader fr;
-    ASSERT_TRUE(fr.open("data2.txt",metadata));
+    ASSERT_TRUE(fr.open("data1.txt",metadata));
     EXPECT_EQ(fr.error(), FileReader::Error::OK);
 }
 
