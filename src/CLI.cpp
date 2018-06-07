@@ -75,14 +75,18 @@ CLI::Choice CLI::showMenu() const
 
 void CLI::loadDatabase()
 {
-    std::string filenameMetadata;
-    std::cout<<"Entrez le nom du fichier de métadonnees :"<<std::endl;
-    std::getline(std::cin, filenameMetadata);
-    bool success = database.loadMetadata(filenameMetadata);
-    if(!success)
+    bool success;
+    if (!alreadyLoaded) //des métadonnées sont déjà en mémoire
     {
-        printError(database.error());
-        return;
+        std::string filenameMetadata;
+        std::cout<<"Entrez le nom du fichier de métadonnees :"<<std::endl;
+        std::getline(std::cin, filenameMetadata);
+        success = database.loadMetadata(filenameMetadata);
+        if(!success)
+        {
+            printError(database.error());
+            return;
+        }
     }
     std::string filenameData;
     std::cout << "Entrez le nom du fichier des données :" << std::endl;
@@ -93,6 +97,7 @@ void CLI::loadDatabase()
         printError(database.error());
         return;
     }
+    alreadyLoaded = true;
 }
 
 void CLI::getDiseaseCharacteristics() const
@@ -161,7 +166,7 @@ void CLI::printError(Database::Error error) const
     }
 }
 
-CLI::CLI() : database()
+CLI::CLI() : database(), alreadyLoaded(false)
 {
     //ctor
 }

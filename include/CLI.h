@@ -27,6 +27,7 @@ class CLI
         void printError(Database::Error error) const;
 
         Database database;
+        bool alreadyLoaded;
 };
 
 inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis)
