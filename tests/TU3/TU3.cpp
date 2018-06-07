@@ -52,7 +52,7 @@ TEST(TU3, b5) {
     ASSERT_FALSE(database.loadMetadata("sdqf sdfjmlksqdf ~#{ßë‘dùmqélmùlé'mùlsflsdf"));
 }
 
-//le nom du fichier est incorrect
+//le nom du fichier est un chemin vers un dossier
 TEST(TU3, b6) {
     Database database;
     ASSERT_FALSE(database.loadMetadata(".."));
@@ -67,8 +67,10 @@ TEST(TU3, b7) {
 //fichiers de métadonnées et de données valides
 TEST(TU3, c) {
     Database database;
-    ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
-    ASSERT_TRUE(database.loadData("data1.txt"));
+    EXPECT_TRUE(database.loadMetadata("metadata1.txt"));
+    EXPECT_EQ(database.error(), Database::Error::OK);
+    EXPECT_TRUE(database.loadData("data1.txt"));
+    EXPECT_EQ(database.error(), Database::Error::OK);
 }
 
 //le fichier de données est vide

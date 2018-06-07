@@ -2,6 +2,7 @@
 #include "FileReader.h"
 #include "CLI.h"
 #include <iostream>
+#include <numeric>
 
 constexpr double EPSILON = 0.5;
 
@@ -17,7 +18,7 @@ bool Database::loadMetadata(const std::string & filename)
         fingerprintMax.values.resize(metadata.attributes.size());
         fingerprintMin.values.resize(metadata.attributes.size());
         fingerprintEtendue.values.resize(metadata.attributes.size());
-        for(unsigned int i=0;i < metadata.attributes.size() ;++i)
+        for(size_t i=0; i < metadata.attributes.size(); ++i)
         {
             if(metadata.attributes[i].type == STRING)
             {
@@ -75,7 +76,7 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     err = Database::Error::OK;
 
     data[disease].push_back(fingerprint);
-    for(unsigned int i = 0; i < fingerprint.values.size(); i++)
+    for(size_t i = 0; i < fingerprint.values.size(); i++)
     {
         if (metadata.attributes[i].type != STRING)
         {
@@ -196,7 +197,7 @@ std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(cons
         {
             return result;
         }
-        result.push_back(std::make_pair(loadedData.first, diagList));
+        result.emplace_back(loadedData.first, diagList);
         loadedData = fileReader.nextFingerprint();
 
         if (fileReader.error() != FileReader::Error::OK && fileReader.error() != FileReader::Error::EMPTY)
@@ -235,11 +236,9 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
             }
             values.push_back(matchingValue);
         }
-        double sum = 0.;
-        for (double value : values)
-        {
-            sum += value;
-        }
+
+        double sum = std::accumulate(values.begin(), values.end(), 0.);
+
         Diagnosis d;
         d.disease = kv.first;
         d.risk = sum / values.size();
@@ -267,11 +266,11 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
     {
         if (diff.values[i].index() != 0 && metadata.attributes[i].type != ID)
         {
-            double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : (double) std::get<int>(diff.values[i]));
+            double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : std::get<int>(diff.values[i]));
             #ifndef NDEBUG
             std::cout << "fonctionne pour diff" << std::endl;
             #endif // NDEBUG
-            double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : (double) std::get<int>(fingerprintEtendue.values[i]);
+            double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : std::get<int>(fingerprintEtendue.values[i]);
             #ifndef NDEBUG
             std::cout << "fonctionne pour etendue" << std::endl;
             #endif // NDEBUG
