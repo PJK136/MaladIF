@@ -28,6 +28,7 @@ void CLI::execute()
         {
             return;
         }
+        std::cout << std::endl;
     }
 
 }
@@ -38,13 +39,13 @@ CLI::Choice CLI::showMenu() const
 {
     std::string choice;
     std::cout<<"Bienvenue sur MaladIF"<<std::endl;
-    std::cout<<"1-(c)harger la base de donnees"<<std::endl;
-    std::cout<<"2-(a)fficher caracteristique maladie"<<std::endl;
-    std::cout<<"3-(d)emander diagnostiques"<<std::endl;
-    std::cout<<"4-(q)uitter"<<std::endl;
+    std::cout<<"1. (c)harger la base de données"<<std::endl;
+    std::cout<<"2. (a)fficher caractéristique maladie"<<std::endl;
+    std::cout<<"3. (d)emander diagnostiques"<<std::endl;
+    std::cout<<"4. (q)uitter"<<std::endl;
     while(true)
     {
-        std::cin>>choice;
+        std::getline(std::cin, choice);
         if(choice == "c" || choice == "1" )
         {
             return LOAD_DATABASE;
@@ -63,7 +64,7 @@ CLI::Choice CLI::showMenu() const
         }
         else
         {
-            std::cout<<"Choix invalide"<<std::endl;
+            std::cout<<"Choix invalide."<<std::endl;
         }
     }
 
@@ -72,21 +73,21 @@ CLI::Choice CLI::showMenu() const
 void CLI::loadDatabase()
 {
     std::string filenameMetadata;
-    std::cout<<"Entrez le nom du fichier de Metadonnees"<<std::endl;
-    std::cin>>filenameMetadata;
+    std::cout<<"Entrez le nom du fichier de métadonnees :"<<std::endl;
+    std::getline(std::cin, filenameMetadata);
     bool success = database.loadMetadata(filenameMetadata);
     if(!success)
     {
-        std::cout<<"invalide, erreur : "<<database.error() << std::endl;
+        printError(database.error());
         return;
     }
     std::string filenameData;
-    std::cout << "Entrez le nom du fichier des donnees" << std::endl;
-    std::cin >> filenameData;
+    std::cout << "Entrez le nom du fichier des données :" << std::endl;
+    std::getline(std::cin, filenameData);
     success = database.loadData(filenameData);
     if (!success)
     {
-        std::cout<<"invalide, erreur : "<<database.error() << std::endl;
+        printError(database.error());
         return;
     }
     database.displayDataBase();
@@ -96,19 +97,11 @@ void CLI::getDiseaseCharacteristics() const
 {
     std::string disease;
     std::cout << "Entrez le nom de la maladie : " << std::endl;
-    std::cin >> disease;
+    std::getline(std::cin, disease);
     std::list<Fingerprint> characs = database.getDiseaseCharacteristics(disease);
-    if (database.error() == Database::Error::NOT_FOUND)
+    if (database.error())
     {
-        std::cout << "Maladie non trouvee : " << disease << std::endl;
-    }
-    else if (database.error() == Database::Error::NO_DATA)
-    {
-        std::cout << "Base de donnees non chargees" << std::endl;
-    }
-    else if (database.error())
-    {
-        std::cout << "Bravo ! Vous avez reussi a declencher une erreur qu'on a meme pas prevu !" << std::endl;
+        printError(database.error());
     }
     else
     {
@@ -123,18 +116,46 @@ void CLI::askDiagnosis() const
 {
     std::string filename;
     std::cout << "Entrez le nom du fichier d'empreintes : " << std::endl;
-    std::cin >> filename;
+    std::getline(std::cin, filename);
     std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> results = database.diagnose(filename);
     if (!database.error())
     {
         for (const auto & result : results)
         {
-            std::cout << "--> [" << result.first << "] :" << std::endl << result.second << std::endl;
+            std::cout << "Enpreinte [" << result.first << "] :" << std::endl << result.second << std::endl;
         }
     }
     else
     {
-        std::cout << "Erreur : " << database.error() << std::endl;
+        printError(database.error());
+    }
+}
+
+void CLI::printError(Database::Error error) const
+{
+    switch (error)
+    {
+    case Database::Error::EMPTY_FILE:
+        std::cerr << "Le fichier est vide." << std::endl;
+        break;
+    case Database::Error::CANT_OPEN:
+        std::cerr << "Impossible d'ouvrir le fichier." << std::endl;
+        break;
+    case Database::Error::NO_METADATA:
+        std::cerr << "Les métadonées n'ont pas été chargées." << std::endl;
+        break;
+    case Database::Error::INVALID:
+        std::cerr << "Le fichier est invalide." << std::endl;
+        break;
+    case Database::Error::NOT_FOUND:
+        std::cerr << "La maladie n'est pas referencée." <<std::endl;
+        break;
+    case Database::Error::NO_DATA:
+        std::cerr << "Les données n'ont pas été chargées." << std::endl;
+        break;
+    default:
+        std::cerr << "Erreur inconnue (code d'erreur : " << database.error() << ")." << std::endl;
+        break;
     }
 }
 

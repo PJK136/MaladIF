@@ -24,13 +24,17 @@ class CLI
         void loadDatabase();
         void getDiseaseCharacteristics() const;
         void askDiagnosis() const;
+        void printError(Database::Error error) const;
 
         Database database;
 };
 
 inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis)
 {
-    stream << "Disease : " << diagnosis.disease << "; risk : " << diagnosis.risk * 100 << "%";
+    if (diagnosis.disease == "")
+        stream << "Patient sain; Risque : " << diagnosis.risk * 100 << "%";
+    else
+        stream << "Maladie : \"" << diagnosis.disease << "\"; Risque : " << diagnosis.risk * 100 << "%";
     return stream;
 }
 
@@ -38,7 +42,7 @@ inline std::ostream &operator<<(std::ostream &stream, const std::vector<Diagnosi
 {
     for (const Diagnosis &diagnosis : diagnosisList)
     {
-        stream << diagnosis << std::endl;
+        stream << "-> " << diagnosis << std::endl;
     }
     return stream;
 }
