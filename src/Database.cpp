@@ -80,6 +80,11 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     err = Database::Error::OK;
 
     data[disease].push_back(fingerprint);
+    if (meanDataBuilder.find(disease) == meanDataBuilder.end()) //init si maladie non existante
+    {
+        meanDataBuilder[disease].sum.values.resize(fingerprint.values.size());
+        meanDataBuilder[disease].fingerprintCount = 0;
+    }
     for(size_t i = 0; i < fingerprint.values.size(); i++)
     {
         if (metadata.attributes[i].type != STRING && !std::holds_alternative<std::monostate>(fingerprint.values[i]))
@@ -94,6 +99,18 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
                 fingerprintMin.values[i] = fingerprint.values[i];
                 fingerprintEtendue.values[i] = fingerprintMax.values[i] - fingerprintMin.values[i];
             }
+
+            //meanDataBuilder
+            if (std::holds_alternative<std::monostate>(meanDataBuilder[disease].sum.values[i])) //sum non initialise
+                meanDataBuilder[disease].sum.values[i] = (std::holds_alternative<bool>(fingerprint.values[i])) ? (int) std::get<bool>(fingerprint.values[i]) : fingerprint.values[i];
+            else //on ajoute
+            {
+                if (std::holds_alternative<bool>(fingerprint.values[i]))
+                    meanDataBuilder[disease].sum.values[i] = std::get<int>meanDataBuilder[disease].sum.values[i] + std::get<bool>fingerprint.values[i];
+
+            }
+
+            meanDataBuilder[disease].fingerprintCount += 1;
         }
     }
 }
@@ -333,7 +350,7 @@ void Database::setError(FileReader::Error frErr) const
     }
 }
 
-Database::Database() : err(Database::Error::OK), data(), metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue()
+Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), meanData(), metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue()
 {
     //ctor
 }

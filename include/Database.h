@@ -16,7 +16,8 @@
 class Database
 {
     public:
-        enum Error {
+        enum Error
+        {
             OK,
             EMPTY_FILE,
             CANT_OPEN,
@@ -37,6 +38,14 @@ class Database
         inline Error error() const { return err; }
 
     private:
+        typedef std::unordered_map<std::string, std::unordered_map<std::string, size_t>> StringValues;
+        //attributeName -> { value -> count }
+        struct MeanFingerprintBuilder
+        {
+            Fingerprint sum;
+            size_t fingerprintCount;
+            StringValues stringValues;
+        };
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);
         std::vector<Diagnosis> diagnose(const Fingerprint & fingerprint) const;
         double fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2) const;
@@ -44,6 +53,8 @@ class Database
 
         mutable Error err;
         std::unordered_map<std::string, std::list<Fingerprint>> data;
+        std::unordered_map<std::string, MeanFingerprintBuilder> meanDataBuilder;
+        std::unordered_map<std::string, Fingerprint> meanData;
         Metadata metadata;
         Fingerprint fingerprintMax;
         Fingerprint fingerprintMin;
