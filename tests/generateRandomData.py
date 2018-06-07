@@ -29,10 +29,10 @@ with open(filename) as f:
 N = int(sys.argv[2])
 D = int(sys.argv[3])
 
-diseases = []
+diseases = random.sample(dnames, D-1)
+diseases.append("")
 dAttributes = []
 for d in range(D):
-    diseases.append(random.choice(dnames) if d != D-1 else "")
     dAttributes.append([])
     for j, t in enumerate(types):
         m = None
@@ -57,11 +57,11 @@ for i in range(1, N+1):
     d = random.randint(0, D-1)
     for j, t in enumerate(types):
         ret = ""
-        if random.randint(0,3*len(types)) != 0: #1/3 des empreintes ont au moins un champ vide
-            if t == "ID":
-                ret = i
-            elif t == "boolean":
-                ret = True if random.gauss(int(dAttributes[d][j]),0.5) >= 0.5 else False
+        if t == "ID":
+            ret = i
+        elif random.randint(0,3*len(types)) != 0: #1/3 des empreintes ont au moins un champ vide
+            if t == "boolean":
+                ret = True if random.gauss(int(dAttributes[d][j]),0.3) >= 0.5 else False
             elif t == "int":
                 ret = int(random.gauss(dAttributes[d][j], sigmaInt))
             elif t == "double":
