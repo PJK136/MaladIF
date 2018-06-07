@@ -9,10 +9,6 @@ struct Diagnosis
 
 inline bool operator==(const Diagnosis &d1, const Diagnosis &d2)
 {
-    if ( (d1.disease == d2.disease) && (d1.risk == d2.risk) )
-    {
-        return true;
-    }
-    return false;
+    return (d1.disease == d2.disease) && (d1.risk == d2.risk);
 }
 #endif // DIAGNOSIS_H
