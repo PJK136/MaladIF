@@ -38,7 +38,10 @@ void CLI::execute()
 CLI::Choice CLI::showMenu() const
 {
     std::string choice;
-    std::cout<<"Bienvenue sur MaladIF"<<std::endl;
+    std::cout << "Bienvenue sur MaladIF"<<std::endl;
+#ifndef NDEBUG
+    std::cout << "(VERSION DEBUG)" << std::endl;
+#endif // NDEBUG
     std::cout<<"1. (c)harger la base de données"<<std::endl;
     std::cout<<"2. (a)fficher caractéristique maladie"<<std::endl;
     std::cout<<"3. (d)emander diagnostiques"<<std::endl;
@@ -90,7 +93,6 @@ void CLI::loadDatabase()
         printError(database.error());
         return;
     }
-    database.displayDataBase();
 }
 
 void CLI::getDiseaseCharacteristics() const
