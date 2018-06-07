@@ -1,8 +1,11 @@
 #include "Database.h"
 #include "FileReader.h"
 #include "CLI.h"
-#include <iostream>
 #include <numeric>
+
+#ifndef NDEBUG
+    #include <iostream>
+#endif
 
 constexpr double EPSILON = 0.5;
 
@@ -215,7 +218,7 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
     err = Database::Error::OK;
 
     #ifndef NDEBUG
-    std::cout << "diagnose : " << fingerprint << std::endl;
+    std::cerr << "diagnose : " << fingerprint << std::endl;
     #endif // NDEBUG
     std::vector<Diagnosis> diagnosisList;
     for (const auto & kv : data)
@@ -224,11 +227,11 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
         for (const auto & fingerprintDB : kv.second)
         {
             #ifndef NDEBUG
-            std::cout << "on match avec : " << fingerprintDB << std::endl;
+            std::cerr << "on match avec : " << fingerprintDB << std::endl;
             #endif // NDEBUG
             double matchingValue = fingerprintMatch(fingerprint, fingerprintDB);
             #ifndef NDEBUG
-            std::cout << "fini" << std::endl;
+            std::cerr << "fini" << std::endl;
             #endif // NDEBUG
             if (err)
             {
@@ -253,7 +256,7 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
 
     Fingerprint diff = fp1 - fp2;
     #ifndef NDEBUG
-    std::cout << "le diff a fonctionne" << std::endl;
+    std::cerr << "le diff a fonctionne" << std::endl;
     #endif // NDEBUG
     if (diff.values.empty())
     {
@@ -268,11 +271,11 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
         {
             double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : std::get<int>(diff.values[i]));
             #ifndef NDEBUG
-            std::cout << "fonctionne pour diff" << std::endl;
+            std::cerr << "fonctionne pour diff" << std::endl;
             #endif // NDEBUG
             double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : std::get<int>(fingerprintEtendue.values[i]);
             #ifndef NDEBUG
-            std::cout << "fonctionne pour etendue" << std::endl;
+            std::cerr << "fonctionne pour etendue" << std::endl;
             #endif // NDEBUG
             if ((val / etendue) < EPSILON)
             {
