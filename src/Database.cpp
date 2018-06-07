@@ -7,8 +7,9 @@ constexpr double EPSILON = 0.5;
 
 bool Database::loadMetadata(const std::string & filename)
 {
+    err = Database::Error::OK;
+
     Metadata metadataTemp = FileReader::readMetadata(filename);
-    setError(FileReader::metadataError());
 
     if(!FileReader::metadataError())
     {
@@ -29,26 +30,29 @@ bool Database::loadMetadata(const std::string & filename)
     }
     else
     {
+        setError(FileReader::metadataError());
         return false;
     }
 }
 
 bool Database::loadData(const std::string & filename)
 {
+    err = Database::Error::OK;
+
     FileReader fileReader;
     bool success = fileReader.open(filename,metadata);
-    setError(fileReader.error());
 
     if(!success)
     {
+        setError(fileReader.error());
         return false;
     }
 
     std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
-    setError(fileReader.error());
 
     if(fileReader.error())
     {
+        setError(fileReader.error());
         return false;
     }
 
@@ -56,9 +60,9 @@ bool Database::loadData(const std::string & filename)
     {
         addFingerprint(loadedData.first,loadedData.second);
         loadedData = fileReader.nextFingerprint();
-        setError(fileReader.error());
         if (fileReader.error() != FileReader::Error::OK && fileReader.error() != FileReader::Error::EMPTY)
         {
+            setError(fileReader.error());
             return false;
         }
     }
@@ -68,6 +72,8 @@ bool Database::loadData(const std::string & filename)
 
 void Database::addFingerprint(const Fingerprint & fingerprint, const std::string & disease)
 {
+    err = Database::Error::OK;
+
     data[disease].push_back(fingerprint);
     for(unsigned int i = 0; i < fingerprint.values.size(); i++)
     {
@@ -135,6 +141,8 @@ void Database::displayDataBase()
 
 std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & disease) const
 {
+    err = Database::Error::OK;
+
     if (data.empty())
     {
         err = Database::Error::NO_DATA;
@@ -154,6 +162,8 @@ std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & d
 
 std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(const std::string & filename) const
 {
+    err = Database::Error::OK;
+
     std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> result;
 
     if (data.empty())
@@ -164,18 +174,18 @@ std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(cons
 
     FileReader fileReader;
     bool success = fileReader.open(filename, metadata);
-    setError(fileReader.error());
 
     if(!success)
     {
+        setError(fileReader.error());
         return result;
     }
 
     std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
-    setError(fileReader.error());
 
     if(fileReader.error())
     {
+        setError(fileReader.error());
         return result;
     }
 
@@ -188,9 +198,10 @@ std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(cons
         }
         result.push_back(std::make_pair(loadedData.first, diagList));
         loadedData = fileReader.nextFingerprint();
-        setError(fileReader.error());
+
         if (fileReader.error() != FileReader::Error::OK && fileReader.error() != FileReader::Error::EMPTY)
         {
+            setError(fileReader.error());
             return result;
         }
     }
@@ -200,6 +211,8 @@ std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(cons
 
 std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
 {
+    err = Database::Error::OK;
+
     #ifndef NDEBUG
     std::cout << "diagnose : " << fingerprint << std::endl;
     #endif // NDEBUG
@@ -237,6 +250,7 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
 
 double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2) const
 {
+    err = Database::Error::OK;
 
     Fingerprint diff = fp1 - fp2;
     #ifndef NDEBUG
@@ -271,7 +285,7 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
             size -= 1;
         }
     }
-    err = Database::Error::OK;
+
     return (sum / size);
 }
 

@@ -27,7 +27,10 @@ FileReader::~FileReader()
 #endif // NDEBUG
 }
 
-bool FileReader::open(const std::string & filename, const Metadata & mdata) {
+bool FileReader::open(const std::string & filename, const Metadata & mdata)
+{
+    err = FileReader::OK;
+
     if (mdata.attributes.empty()) {
         err = NO_METADATA;
         return false;
@@ -109,6 +112,8 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata) {
 
 std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
 {
+    err = FileReader::OK;
+
     std::string line;
     getline(file, line);
     if (line.empty())
@@ -195,6 +200,8 @@ std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
 
 Metadata FileReader::readMetadata(const std::string & filename)
 {
+    metadataErr = Error::OK;
+
     std::ifstream file(filename);
     Metadata metadata;
 
