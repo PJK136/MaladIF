@@ -19,16 +19,11 @@ TEST(TU5, a1) {
     EXPECT_EQ((*it).first, fp);
     EXPECT_EQ(((*it).second).size(), 3);
     std::vector<Diagnosis>::iterator it2 = (*it).second.begin();
-    Diagnosis d;
-    d.disease = "Maladie2";
-    d.risk = 1.;
-    EXPECT_EQ(*it2, d);
-    it2++;
-    d.disease = "Maladie1";
-    d.risk = 0.5;
-    EXPECT_EQ(*it2, d);
+    EXPECT_EQ((*it2).disease, "Maladie2");
     it2++;
     EXPECT_EQ((*it2).disease, "");
+    it2++;
+    EXPECT_EQ((*it2).disease, "Maladie1");
 }
 
 //analyse d'un fichier d'empreintes contenant plusieurs empreintes
@@ -48,22 +43,18 @@ TEST(TU5, a2) {
     EXPECT_EQ((*it).first, fp);
     EXPECT_EQ(((*it).second).size(), 3);
     std::vector<Diagnosis>::iterator it2 = (*it).second.begin();
-    Diagnosis d;
-    d.disease = "Maladie2";
-    d.risk = 1.;
-    EXPECT_EQ(*it2, d);
-    it2++;
-    d.disease = "Maladie1";
-    d.risk = 0.5;
-    EXPECT_EQ(*it2, d);
+    EXPECT_EQ((*it2).disease, "Maladie2");
     it2++;
     EXPECT_EQ((*it2).disease, "");
+    it2++;
+    EXPECT_EQ((*it2).disease, "Maladie1");
 
     fp.values = {2,std::string("False"),1.1,14.3,std::monostate(),2367.};
     it++;
     EXPECT_EQ((*it).first, fp);
     EXPECT_EQ(((*it).second).size(), 3);
     std::vector<Diagnosis>::iterator it3 = (*it).second.begin();
+    Diagnosis d;
     d.disease = "";
     d.risk = 1.;
     EXPECT_EQ(*it3, d);
@@ -158,14 +149,9 @@ TEST(TU5, c2) {
     EXPECT_EQ((*it).first, fp);
     EXPECT_EQ(((*it).second).size(), 3);
     std::vector<Diagnosis>::iterator it2 = (*it).second.begin();
-    Diagnosis d;
-    d.disease = "Maladie2";
-    d.risk = 1.;
-    EXPECT_EQ(*it2, d);
-    it2++;
-    d.disease = "Maladie1";
-    d.risk = 0.5;
-    EXPECT_EQ(*it2, d);
+    EXPECT_EQ((*it2).disease, "Maladie2");
     it2++;
     EXPECT_EQ((*it2).disease, "");
+    it2++;
+    EXPECT_EQ((*it2).disease, "Maladie1");
 }
