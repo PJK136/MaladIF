@@ -73,19 +73,19 @@ bool Database::loadData(const std::string & filename)
     }
 
 #ifndef NDEBUG
-    std::cout << "---- MEAN DATA BUILDER ----" << std::endl;
+    std::cerr << "---- MEAN DATA BUILDER ----" << std::endl;
     for (const auto & diseaseAndBuilder : meanDataBuilder)
     {
-        std::cout << "DISEASE : " << diseaseAndBuilder.first << std::endl;
-        std::cout << "\tSUM : " << diseaseAndBuilder.second.sum << std::endl;
-        std::cout << "\tCOUNT : " << diseaseAndBuilder.second.fingerprintCount << std::endl;
-        std::cout << "\tSTRINGS :" << std::endl;
+        std::cerr << "DISEASE : " << diseaseAndBuilder.first << std::endl;
+        std::cerr << "\tSUM : " << diseaseAndBuilder.second.sum << std::endl;
+        std::cerr << "\tCOUNT : " << diseaseAndBuilder.second.fingerprintCount << std::endl;
+        std::cerr << "\tSTRINGS :" << std::endl;
         for (const auto & attributeAndStrings : diseaseAndBuilder.second.stringValues)
         {
-            std::cout << "\t[" << attributeAndStrings.first << "]" << std::endl;
+            std::cerr << "\t[" << attributeAndStrings.first << "]" << std::endl;
             for (const auto & stringAndCount : attributeAndStrings.second)
             {
-                std::cout << "\t\t" << stringAndCount.first << " -> " << stringAndCount.second << std::endl;
+                std::cerr << "\t\t" << stringAndCount.first << " -> " << stringAndCount.second << std::endl;
             }
         }
     }
@@ -129,10 +129,10 @@ bool Database::loadData(const std::string & filename)
     }
 
 #ifndef NDEBUG
-    std::cout << "---- MEAN DATA ----" << std::endl;
+    std::cerr << "---- MEAN DATA ----" << std::endl;
     for (const auto & diseaseAndMeanFp : meanData)
     {
-        std::cout << "[" << diseaseAndMeanFp.first << "] -> " << diseaseAndMeanFp.second << std::endl;
+        std::cerr << "[" << diseaseAndMeanFp.first << "] -> " << diseaseAndMeanFp.second << std::endl;
     }
 #endif // NDEBUG
 
