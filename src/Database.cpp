@@ -2,12 +2,13 @@
 #include "FileReader.h"
 #include "CLI.h"
 #include <numeric>
+#include <algorithm>
 
 #ifndef NDEBUG
     #include <iostream>
 #endif
 
-constexpr double EPSILON = 0.5;
+constexpr double EPSILON = 0.1;
 
 bool Database::loadMetadata(const std::string & filename)
 {
@@ -81,7 +82,7 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     data[disease].push_back(fingerprint);
     for(size_t i = 0; i < fingerprint.values.size(); i++)
     {
-        if (metadata.attributes[i].type != STRING)
+        if (metadata.attributes[i].type != STRING && !std::holds_alternative<std::monostate>(fingerprint.values[i]))
         {
             if (std::holds_alternative<std::monostate>(fingerprintMax.values[i]) || fingerprint.values[i] > fingerprintMax.values[i])
             {
@@ -185,7 +186,7 @@ std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(cons
         return result;
     }
 
-    std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
+    std::pair<Fingerprint, std::string> loadedData(fileReader.nextFingerprint());
 
     if(fileReader.error())
     {
@@ -233,11 +234,8 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
             #ifndef NDEBUG
             std::cerr << "fini" << std::endl;
             #endif // NDEBUG
-            if (err)
-            {
-                return std::vector<Diagnosis>{};
-            }
-            values.push_back(matchingValue);
+            if (!err)
+                values.push_back(matchingValue);
         }
 
         double sum = std::accumulate(values.begin(), values.end(), 0.);
@@ -247,6 +245,13 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
         d.risk = sum / values.size();
         diagnosisList.push_back(d);
     }
+
+    std::sort(diagnosisList.begin(), diagnosisList.end(),
+    [](const Diagnosis &a, const Diagnosis &b) {
+        return a.risk > b.risk;
+    });
+
+    err = Database::Error::OK;
     return diagnosisList;
 }
 
@@ -260,7 +265,10 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
     #endif // NDEBUG
     if (diff.values.empty())
     {
+        #ifndef NDEBUG
+        std::cerr << fp1 << std::endl << fp2 << std::endl;
         err = Database::Error::INVALID;
+        #endif // NDEBUG
         return 0.;
     }
     double sum = 0.;
@@ -269,17 +277,24 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
     {
         if (diff.values[i].index() != 0 && metadata.attributes[i].type != ID)
         {
-            double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : std::get<int>(diff.values[i]));
-            #ifndef NDEBUG
-            std::cerr << "fonctionne pour diff" << std::endl;
-            #endif // NDEBUG
-            double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : std::get<int>(fingerprintEtendue.values[i]);
-            #ifndef NDEBUG
-            std::cerr << "fonctionne pour etendue" << std::endl;
-            #endif // NDEBUG
-            if ((val / etendue) < EPSILON)
+            if (metadata.attributes[i].type != BOOLEAN)
             {
-                sum += 1.;
+                double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : std::get<int>(diff.values[i]));
+                #ifndef NDEBUG
+                std::cerr << "fonctionne pour diff" << std::endl;
+                #endif // NDEBUG
+                double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : std::get<int>(fingerprintEtendue.values[i]);
+                #ifndef NDEBUG
+                std::cerr << "fonctionne pour etendue" << std::endl;
+                #endif // NDEBUG
+                sum += std::max(0., 1-((val / etendue)/EPSILON));
+            }
+            else
+            {
+                if (!std::get<int>(diff.values[i]))
+                    sum += 1.;
+                else
+                    sum += 0.5;
             }
         }
         else
@@ -288,7 +303,12 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
         }
     }
 
-    return (sum / size);
+    if (size)
+        return (sum / size);
+    else {
+        err = Database::Error::INVALID;
+        return 0;
+    }
 }
 
 void Database::setError(FileReader::Error frErr) const
