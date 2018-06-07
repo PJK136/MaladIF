@@ -1,6 +1,13 @@
 configure_file(../data/metadata1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(../data/data1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(../data/diagnosis1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/diagnosis2.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/empty.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/data_bad1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/diagnosis_bad1.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/diagnosis_bad2.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/diagnosis_bad3.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(../data/diagnosis_bad4.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable(TU5 TU5.cpp $<TARGET_OBJECTS:MaladIF_core>)
 target_link_libraries(TU5 gtest_main)
