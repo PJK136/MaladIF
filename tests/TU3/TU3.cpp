@@ -69,7 +69,9 @@ TEST(TU3, b5) {
 TEST(TU3, b6) {
     Database database;
     ASSERT_FALSE(database.loadMetadata(".."));
-    EXPECT_EQ(database.error(), Database::Error::CANT_OPEN);
+    //Sous Linux, on peut ouvrir un dossier avec fstream alors que sous Windows non
+    //Donc le code d'erreur change selon l'OS
+    EXPECT_NE(database.error(), Database::Error::OK);
 }
 
 //le fichier est vide
