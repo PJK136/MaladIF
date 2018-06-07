@@ -26,9 +26,9 @@ bool Database::loadMetadata(const std::string & filename)
         {
             if(metadata.attributes[i].type == STRING)
             {
-                fingerprintMax.values[i] = 1;
-                fingerprintMin.values[i] = 0;
-                fingerprintEtendue.values[i] = 1;
+                fingerprintMax.values[i] = 1.;
+                fingerprintMin.values[i] = 0.;
+                fingerprintEtendue.values[i] = 1.;
             }
         }
         return true;
@@ -53,7 +53,7 @@ bool Database::loadData(const std::string & filename)
         return false;
     }
 
-    std::pair <Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
+    std::pair<Fingerprint, std::string >loadedData(fileReader.nextFingerprint());
 
     if(fileReader.error())
     {
@@ -92,6 +92,20 @@ bool Database::loadData(const std::string & filename)
 
 #endif // NDEBUG
 
+
+    //construction etendu
+    fingerprintEtendue.values.resize(metadata.attributes.size());
+    for (size_t i = 0; i < fingerprintEtendue.values.size(); i++)
+    {
+        auto diff = fingerprintMax.values[i] - fingerprintMin.values[i];
+        if (std::holds_alternative<int>(diff))
+            fingerprintEtendue.values[i] = (double) std::get<int>(diff);
+        else if (std::holds_alternative<double>(diff))
+            fingerprintEtendue.values[i] = std::get<double>(diff);
+        else
+            fingerprintEtendue.values[i] = std::monostate();
+    }
+
     //construction meanData
     for (const auto & diseaseAndBuilder : meanDataBuilder)
     {
@@ -100,17 +114,11 @@ bool Database::loadData(const std::string & filename)
         {
             if (metadata.attributes[i].type == STRING)
             {
-                std::string bestString;
-                size_t maxCount = 0;
-                for (const auto & stringAndCount : diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name))
-                {
-                    if (stringAndCount.second > maxCount)
-                    {
-                        maxCount = stringAndCount.second;
-                        bestString = stringAndCount.first;
-                    }
-                }
-                meanData[diseaseAndBuilder.first].values[i] = bestString;
+                auto &stringValues = diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name);
+                meanData[diseaseAndBuilder.first].values[i] = std::max_element(stringValues.begin(), stringValues.end(),
+                                                                               [](const std::pair<std::string,size_t> &p1, const std::pair<std::string,size_t> &p2) {
+                                                                                   return p1.second < p2.second;
+                                                                               })->first;
             }
             else
             {
@@ -119,10 +127,10 @@ bool Database::loadData(const std::string & filename)
                 {
                     double sum = 0;
                     if (std::holds_alternative<int>(sumValue))
-                        sum = (double) std::get<int>(sumValue);
+                        sum = std::get<int>(sumValue);
                     else if (std::holds_alternative<double>(sumValue))
                         sum = std::get<double>(sumValue);
-                    meanData[diseaseAndBuilder.first].values[i] = sum / (double) diseaseAndBuilder.second.fingerprintCount;
+                    meanData[diseaseAndBuilder.first].values[i] = sum / diseaseAndBuilder.second.fingerprintCount;
                 }
             }
         }
@@ -150,18 +158,16 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     }
     for(size_t i = 0; i < fingerprint.values.size(); i++)
     {
-        if (metadata.attributes[i].type != STRING && !std::holds_alternative<std::monostate>(fingerprint.values[i]))
+        if (std::holds_alternative<std::monostate>(fingerprint.values[i]))
+            continue;
+
+        if (metadata.attributes[i].type != STRING)
         {
             if (std::holds_alternative<std::monostate>(fingerprintMax.values[i]) || fingerprint.values[i] > fingerprintMax.values[i])
-            {
                 fingerprintMax.values[i] = fingerprint.values[i];
-                fingerprintEtendue.values[i] = fingerprintMax.values[i] - fingerprintMin.values[i];
-            }
+
             if (std::holds_alternative<std::monostate>(fingerprintMin.values[i]) || fingerprint.values[i] < fingerprintMin.values[i])
-            {
                 fingerprintMin.values[i] = fingerprint.values[i];
-                fingerprintEtendue.values[i] = fingerprintMax.values[i] - fingerprintMin.values[i];
-            }
 
             //meanDataBuilder
             if (std::holds_alternative<std::monostate>(meanDataBuilder[disease].sum.values[i])) //sum non initialise
@@ -176,7 +182,7 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
                     meanDataBuilder[disease].sum.values[i] = std::get<double>(meanDataBuilder[disease].sum.values[i]) + std::get<double>(fingerprint.values[i]);
             }
         }
-        else if (metadata.attributes[i].type == STRING)
+        else
         {
             meanDataBuilder[disease].stringValues[metadata.attributes[i].name][std::get<std::string>(fingerprint.values[i])] += 1;
         }
@@ -343,13 +349,21 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
     size_t size = diff.values.size();
     for (size_t i = 0; i < diff.values.size(); ++i)
     {
-        if (diff.values[i].index() != 0 && metadata.attributes[i].type != ID)
+        if (!std::holds_alternative<std::monostate>(fingerprintEtendue.values[i]) &&
+                !std::holds_alternative<std::monostate>(diff.values[i]) &&
+                metadata.attributes[i].type != ID)
         {
             if (metadata.attributes[i].type != BOOLEAN)
             {
-                double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : std::get<int>(diff.values[i]));
-                double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : std::get<int>(fingerprintEtendue.values[i]);
-                sum += std::max(0., 1-((val / etendue)/EPSILON));
+                double val = 0;
+                if (std::holds_alternative<double>(diff.values[i]))
+                    val = std::get<double>(diff.values[i]);
+                else
+                    val = std::get<int>(diff.values[i]);
+
+                double etendue = std::get<double>(fingerprintEtendue.values[i]);
+
+                sum += std::max(0., 1-((std::abs(val) / etendue)/EPSILON));
             }
             else
             {
@@ -403,9 +417,4 @@ Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), mean
 Database::~Database()
 {
     //dtor
-}
-
-Database::MeanFingerprintBuilder::MeanFingerprintBuilder() : sum(), fingerprintCount(0), stringValues()
-{
-
 }

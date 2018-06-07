@@ -38,15 +38,14 @@ class Database
         inline Error error() const { return err; }
 
     private:
+        //key = attributeName -> value = { value -> count }
         typedef std::unordered_map<std::string, std::unordered_map<std::string, size_t>> StringValues;
-        //attributeName -> { value -> count }
+
         struct MeanFingerprintBuilder
         {
-            MeanFingerprintBuilder();
-
-            Fingerprint sum;
-            size_t fingerprintCount;
-            StringValues stringValues;
+            Fingerprint sum{};
+            size_t fingerprintCount{0};
+            StringValues stringValues{};
         };
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);
         std::vector<Diagnosis> diagnose(const Fingerprint & fingerprint) const;
@@ -54,6 +53,7 @@ class Database
         void setError(FileReader::Error frErr) const;
 
         mutable Error err;
+        //key = disease name
         std::unordered_map<std::string, std::list<Fingerprint>> data;
         std::unordered_map<std::string, MeanFingerprintBuilder> meanDataBuilder;
         std::unordered_map<std::string, Fingerprint> meanData;

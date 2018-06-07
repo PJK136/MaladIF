@@ -33,25 +33,26 @@ inline bool operator==(const Fingerprint &f1, const Fingerprint &f2)
 
 inline FingerprintValue operator-(const FingerprintValue &f1, const FingerprintValue &f2)
 {
-    if(f1.index() == 0 || f2.index() == 0)
+    if(std::holds_alternative<std::monostate>(f1) || std::holds_alternative<std::monostate>(f2))
     {
         return std::monostate();
     }
-    else if(f1.index() == 4 && f2.index() == 4)
+    else if (std::holds_alternative<bool>(f1) && std::holds_alternative<bool>(f2))
     {
         return (int)(f1 != f2);
     }
-    else if (f1.index() == 2 && f2.index() == 2)
+    else if (std::holds_alternative<int>(f1) && std::holds_alternative<int>(f2))
     {
         return std::get<int>(f1) - std::get<int>(f2);
     }
-    else if((f1.index() == 3 || f1.index() == 2) && (f2.index() == 3 || f2.index() == 2))
+    else if ((std::holds_alternative<double>(f1) || std::holds_alternative<int>(f1)) &&
+             (std::holds_alternative<double>(f2) || std::holds_alternative<int>(f2)))
     {
-        double d1 = (f1.index() == 3) ? std::get<double>(f1) : (double)(std::get<int>(f1));
-        double d2 = (f2.index() == 3) ? std::get<double>(f2) : (double)(std::get<int>(f2));
+        double d1 = std::holds_alternative<double>(f1) ? std::get<double>(f1) : std::get<int>(f1);
+        double d2 = std::holds_alternative<double>(f2) ? std::get<double>(f2) : std::get<int>(f2);
         return d1 - d2;
     }
-    else if (f1.index() == 1 && f2.index() == 1)
+    else if(std::holds_alternative<std::string>(f1) && std::holds_alternative<std::string>(f2))
     {
         return (int)(f1 != f2);
     }
@@ -68,7 +69,7 @@ inline Fingerprint operator-(const Fingerprint &f1, const Fingerprint &f2)
     }
 
     diff.values.resize(f1.values.size());
-    for (unsigned int i = 0; i < f1.values.size(); ++i)
+    for (size_t i = 0; i < f1.values.size(); ++i)
     {
         diff.values[i] = f1.values[i] - f2.values[i];
     }
