@@ -92,6 +92,50 @@ bool Database::loadData(const std::string & filename)
 
 #endif // NDEBUG
 
+    //construction meanData
+    for (const auto & diseaseAndBuilder : meanDataBuilder)
+    {
+        meanData[diseaseAndBuilder.first].values.resize(metadata.attributes.size());
+        for (size_t i = 0; i < metadata.attributes.size(); ++i)
+        {
+            if (metadata.attributes[i].type == STRING)
+            {
+                std::string bestString;
+                size_t maxCount = 0;
+                for (const auto & stringAndCount : diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name))
+                {
+                    if (stringAndCount.second > maxCount)
+                    {
+                        maxCount = stringAndCount.second;
+                        bestString = stringAndCount.first;
+                    }
+                }
+                meanData[diseaseAndBuilder.first].values[i] = bestString;
+            }
+            else
+            {
+                const FingerprintValue & sumValue = diseaseAndBuilder.second.sum.values[i];
+                if (!std::holds_alternative<std::monostate>(sumValue))
+                {
+                    double sum = 0;
+                    if (std::holds_alternative<int>(sumValue))
+                        sum = (double) std::get<int>(sumValue);
+                    else if (std::holds_alternative<double>(sumValue))
+                        sum = std::get<double>(sumValue);
+                    meanData[diseaseAndBuilder.first].values[i] = sum / (double) diseaseAndBuilder.second.fingerprintCount;
+                }
+            }
+        }
+    }
+
+#ifndef NDEBUG
+    std::cout << "---- MEAN DATA ----" << std::endl;
+    for (const auto & diseaseAndMeanFp : meanData)
+    {
+        std::cout << "[" << diseaseAndMeanFp.first << "] -> " << diseaseAndMeanFp.second << std::endl;
+    }
+#endif // NDEBUG
+
     return true;
 }
 
