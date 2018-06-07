@@ -72,6 +72,26 @@ bool Database::loadData(const std::string & filename)
         }
     }
 
+#ifndef NDEBUG
+    std::cout << "---- MEAN DATA BUILDER ----" << std::endl;
+    for (const auto & diseaseAndBuilder : meanDataBuilder)
+    {
+        std::cout << "DISEASE : " << diseaseAndBuilder.first << std::endl;
+        std::cout << "\tSUM : " << diseaseAndBuilder.second.sum << std::endl;
+        std::cout << "\tCOUNT : " << diseaseAndBuilder.second.fingerprintCount << std::endl;
+        std::cout << "\tSTRINGS :" << std::endl;
+        for (const auto & attributeAndStrings : diseaseAndBuilder.second.stringValues)
+        {
+            std::cout << "\t[" << attributeAndStrings.first << "]" << std::endl;
+            for (const auto & stringAndCount : attributeAndStrings.second)
+            {
+                std::cout << "\t\t" << stringAndCount.first << " -> " << stringAndCount.second << std::endl;
+            }
+        }
+    }
+
+#endif // NDEBUG
+
     return true;
 }
 
@@ -83,7 +103,6 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     if (meanDataBuilder.find(disease) == meanDataBuilder.end()) //init si maladie non existante
     {
         meanDataBuilder[disease].sum.values.resize(fingerprint.values.size());
-        meanDataBuilder[disease].fingerprintCount = 0;
     }
     for(size_t i = 0; i < fingerprint.values.size(); i++)
     {
@@ -106,13 +125,20 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
             else //on ajoute
             {
                 if (std::holds_alternative<bool>(fingerprint.values[i]))
-                    meanDataBuilder[disease].sum.values[i] = std::get<int>meanDataBuilder[disease].sum.values[i] + std::get<bool>fingerprint.values[i];
-
+                    meanDataBuilder[disease].sum.values[i] = std::get<int>(meanDataBuilder[disease].sum.values[i]) + std::get<bool>(fingerprint.values[i]);
+                else if (std::holds_alternative<int>(fingerprint.values[i]))
+                    meanDataBuilder[disease].sum.values[i] = std::get<int>(meanDataBuilder[disease].sum.values[i]) + std::get<int>(fingerprint.values[i]);
+                else //contient <double>
+                    meanDataBuilder[disease].sum.values[i] = std::get<double>(meanDataBuilder[disease].sum.values[i]) + std::get<double>(fingerprint.values[i]);
             }
-
-            meanDataBuilder[disease].fingerprintCount += 1;
+        }
+        else if (metadata.attributes[i].type == STRING)
+        {
+            meanDataBuilder[disease].stringValues[metadata.attributes[i].name][std::get<std::string>(fingerprint.values[i])] += 1;
         }
     }
+
+    meanDataBuilder[disease].fingerprintCount += 1;
 }
 
 //TOOD : À déplacer
@@ -358,4 +384,9 @@ Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), mean
 Database::~Database()
 {
     //dtor
+}
+
+Database::MeanFingerprintBuilder::MeanFingerprintBuilder() : sum(), fingerprintCount(0), stringValues()
+{
+
 }

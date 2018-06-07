@@ -42,6 +42,8 @@ class Database
         //attributeName -> { value -> count }
         struct MeanFingerprintBuilder
         {
+            MeanFingerprintBuilder();
+
             Fingerprint sum;
             size_t fingerprintCount;
             StringValues stringValues;
