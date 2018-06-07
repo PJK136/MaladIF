@@ -309,27 +309,11 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
     std::cerr << "diagnose : " << fingerprint << std::endl;
     #endif // NDEBUG
     std::vector<Diagnosis> diagnosisList;
-    for (const auto & kv : data)
+    for (const auto & diseaseAndMeanFp : meanData)
     {
-        std::vector<double> values;
-        for (const auto & fingerprintDB : kv.second)
-        {
-            #ifndef NDEBUG
-            std::cerr << "on match avec : " << fingerprintDB << std::endl;
-            #endif // NDEBUG
-            double matchingValue = fingerprintMatch(fingerprint, fingerprintDB);
-            #ifndef NDEBUG
-            std::cerr << "fini" << std::endl;
-            #endif // NDEBUG
-            if (!err)
-                values.push_back(matchingValue);
-        }
-
-        double sum = std::accumulate(values.begin(), values.end(), 0.);
-
         Diagnosis d;
-        d.disease = kv.first;
-        d.risk = sum / values.size();
+        d.disease = diseaseAndMeanFp.first;
+        d.risk = fingerprintMatch(fingerprint, diseaseAndMeanFp.second);
         diagnosisList.push_back(d);
     }
 
@@ -347,9 +331,6 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
     err = Database::Error::OK;
 
     Fingerprint diff = fp1 - fp2;
-    #ifndef NDEBUG
-    std::cerr << "le diff a fonctionne" << std::endl;
-    #endif // NDEBUG
     if (diff.values.empty())
     {
         #ifndef NDEBUG
@@ -367,13 +348,7 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
             if (metadata.attributes[i].type != BOOLEAN)
             {
                 double val = std::abs((diff.values[i].index() == 3) ? std::get<double>(diff.values[i]) : std::get<int>(diff.values[i]));
-                #ifndef NDEBUG
-                std::cerr << "fonctionne pour diff" << std::endl;
-                #endif // NDEBUG
                 double etendue = (fingerprintEtendue.values[i].index() == 3) ? std::get<double>(fingerprintEtendue.values[i]) : std::get<int>(fingerprintEtendue.values[i]);
-                #ifndef NDEBUG
-                std::cerr << "fonctionne pour etendue" << std::endl;
-                #endif // NDEBUG
                 sum += std::max(0., 1-((val / etendue)/EPSILON));
             }
             else
