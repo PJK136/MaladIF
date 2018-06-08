@@ -326,6 +326,7 @@ bool Database::startDiagnosis(const std::string & filename)
         return false;
     }
 
+    diagnoseFile.close();
     bool success = diagnoseFile.open(filename, metadata);
 
     if(!success)
