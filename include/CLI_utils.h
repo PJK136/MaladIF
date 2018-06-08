@@ -66,13 +66,13 @@ inline std::ostream &operator<<(std::ostream &stream, const FingerprintValue &v)
     if (std::holds_alternative<std::monostate>(v)) {
         return stream << "null";
     } else if (std::holds_alternative<bool>(v)) {
-        return stream << std::get<1>(v);
+        return stream << (std::get<bool>(v) ? "True" : "False");
     } else if (std::holds_alternative<int>(v)) {
-        return stream << std::get<2>(v);
+        return stream << std::get<int>(v);
     } else if (std::holds_alternative<double>(v)) {
-        return stream << std::get<3>(v);
+        return stream << std::get<double>(v);
     } else if (std::holds_alternative<std::string>(v)) {
-        return stream << std::get<4>(v);
+        return stream << std::get<std::string>(v);
     } else {
         return stream << "unsupported type";
     }

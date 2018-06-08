@@ -99,10 +99,8 @@ bool Database::loadData(const std::string & filename)
     for (size_t i = 0; i < fingerprintEtendue.values.size(); i++)
     {
         auto diff = fingerprintMax.values[i] - fingerprintMin.values[i];
-        if (std::holds_alternative<int>(diff))
-            fingerprintEtendue.values[i] = (double) std::get<int>(diff);
-        else if (std::holds_alternative<double>(diff))
-            fingerprintEtendue.values[i] = std::get<double>(diff);
+        if (FingerprintUtil::isNumeric(diff))
+            fingerprintEtendue.values[i] = FingerprintUtil::asDouble(diff);
         else
             fingerprintEtendue.values[i] = std::monostate();
     }
@@ -120,7 +118,7 @@ bool Database::loadData(const std::string & filename)
             }
             else if (metadata.attributes[i].type == STRING)
             {
-                auto &stringValues = diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name);
+                const auto &stringValues = diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name);
                 meanData[diseaseAndBuilder.first].values[i] = std::max_element(stringValues.begin(), stringValues.end(),
                                                                                [](const std::pair<std::string,size_t> &p1, const std::pair<std::string,size_t> &p2) {
                                                                                    return p1.second < p2.second;
@@ -131,39 +129,28 @@ bool Database::loadData(const std::string & filename)
                 const FingerprintValue & sumValue = diseaseAndBuilder.second.sum.values[i];
                 if (!std::holds_alternative<std::monostate>(sumValue))
                 {
-                    double sum = 0;
-                    if (std::holds_alternative<int>(sumValue))
-                        sum = std::get<int>(sumValue);
-                    else if (std::holds_alternative<double>(sumValue))
-                        sum = std::get<double>(sumValue);
-                    meanData[diseaseAndBuilder.first].values[i] = sum / diseaseAndBuilder.second.counts[i];
+                    meanData[diseaseAndBuilder.first].values[i] = FingerprintUtil::asDouble(sumValue) / diseaseAndBuilder.second.counts[i];
                 }
             }
         }
 
         //calcul ecart type ------------
-        for (const Fingerprint & fingerprint : data[diseaseAndBuilder.first])
+        for (size_t i = 0; i < metadata.attributes.size(); ++i)
         {
-            for (size_t i = 0; i < metadata.attributes.size(); ++i)
+            if (metadata.attributes[i].type != ID && metadata.attributes[i].type != STRING)
             {
-                if (metadata.attributes[i].type != ID && metadata.attributes[i].type != STRING && !std::holds_alternative<std::monostate>(fingerprint.values[i]))
+                for (const Fingerprint &fingerprint : data[diseaseAndBuilder.first])
                 {
-                    double value;
-                    if (metadata.attributes[i].type == BOOLEAN)
-                        value = std::get<bool>(fingerprint.values[i]);
-                    else if (metadata.attributes[i].type == INT)
-                        value = std::get<int>(fingerprint.values[i]);
-                    else //double
-                        value = std::get<double>(fingerprint.values[i]);
+                    if (std::holds_alternative<std::monostate>(fingerprint.values[i]))
+                        continue;
+
+                    double value = FingerprintUtil::asDouble(fingerprint.values[i]);
                     double mean = std::get<double>(meanData[diseaseAndBuilder.first].values[i]);
                     stdDeviation[diseaseAndBuilder.first][i] += (value - mean) * (value - mean);
                 }
             }
-        }
 
-        for (size_t i = 0; i < metadata.attributes.size(); ++i)
-        {
-             stdDeviation[diseaseAndBuilder.first][i] = std::sqrt(stdDeviation[diseaseAndBuilder.first][i] / diseaseAndBuilder.second.counts[i]);
+            stdDeviation[diseaseAndBuilder.first][i] = std::sqrt(stdDeviation[diseaseAndBuilder.first][i] / diseaseAndBuilder.second.counts[i]);
         }
     }
 
@@ -212,7 +199,7 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
                     meanDataBuilder[disease].sum.values[i] = std::get<int>(meanDataBuilder[disease].sum.values[i]) + std::get<bool>(fingerprint.values[i]);
                 else if (std::holds_alternative<int>(fingerprint.values[i]))
                     meanDataBuilder[disease].sum.values[i] = std::get<int>(meanDataBuilder[disease].sum.values[i]) + std::get<int>(fingerprint.values[i]);
-                else //contient <double>
+                else if (std::holds_alternative<double>(fingerprint.values[i]))
                     meanDataBuilder[disease].sum.values[i] = std::get<double>(meanDataBuilder[disease].sum.values[i]) + std::get<double>(fingerprint.values[i]);
             }
         }
@@ -408,22 +395,14 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
         {
             if (metadata.attributes[i].type != BOOLEAN)
             {
-                double val = 0;
-                if (std::holds_alternative<double>(diff.values[i]))
-                    val = std::get<double>(diff.values[i]);
-                else
-                    val = std::get<int>(diff.values[i]);
-
+                double val = FingerprintUtil::asDouble(diff.values[i]);
                 double etendue = std::get<double>(fingerprintEtendue.values[i]);
 
                 sum += std::max(0., 1-((std::abs(val) / etendue)/EPSILON));
             }
             else
             {
-                if (!std::get<int>(diff.values[i]))
-                    sum += 1.;
-                else
-                    sum += 0.5;
+                sum += std::max(0., 1.-std::abs(FingerprintUtil::asDouble(diff.values[i])));
             }
         }
         else
@@ -434,7 +413,8 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
 
     if (size)
         return (sum / size);
-    else {
+    else
+    {
         err = Database::Error::INVALID;
         return 0;
     }

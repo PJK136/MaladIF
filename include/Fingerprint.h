@@ -3,11 +3,32 @@
 
 #include <vector>
 #include <variant>
+#include <numeric>
 #include <string>
-#include <iostream>
 
 typedef std::variant<std::monostate,bool,int,double,std::string> FingerprintValue;
 
+namespace FingerprintUtil
+{
+    inline bool isNumeric(const FingerprintValue &value)
+    {
+        return std::holds_alternative<double>(value) ||
+                std::holds_alternative<int>(value) ||
+                 std::holds_alternative<bool>(value);
+    }
+
+    inline double asDouble(const FingerprintValue &value)
+    {
+        if (std::holds_alternative<double>(value))
+            return std::get<double>(value);
+        else if (std::holds_alternative<int>(value))
+            return std::get<int>(value);
+        else if (std::holds_alternative<bool>(value))
+            return std::get<bool>(value);
+        else
+            return std::numeric_limits<double>::quiet_NaN();
+    }
+}
 
 struct Fingerprint
 {
@@ -33,28 +54,31 @@ inline bool operator==(const Fingerprint &f1, const Fingerprint &f2)
 
 inline FingerprintValue operator-(const FingerprintValue &f1, const FingerprintValue &f2)
 {
-    if(std::holds_alternative<std::monostate>(f1) || std::holds_alternative<std::monostate>(f2))
+    if (f1.index() == f2.index())
     {
-        return std::monostate();
+        if (std::holds_alternative<bool>(f1))
+        {
+            return (int)(f1 != f2);
+        }
+        else if (std::holds_alternative<int>(f1))
+        {
+            return std::get<int>(f1) - std::get<int>(f2);
+        }
+        else if (std::holds_alternative<double>(f1))
+        {
+            return std::get<double>(f1) - std::get<double>(f2);
+        }
+        else if(std::holds_alternative<std::string>(f1))
+        {
+            return (int)(f1 != f2);
+        }
     }
-    else if (std::holds_alternative<bool>(f1) && std::holds_alternative<bool>(f2))
+    else
     {
-        return (int)(f1 != f2);
-    }
-    else if (std::holds_alternative<int>(f1) && std::holds_alternative<int>(f2))
-    {
-        return std::get<int>(f1) - std::get<int>(f2);
-    }
-    else if ((std::holds_alternative<double>(f1) || std::holds_alternative<int>(f1)) &&
-             (std::holds_alternative<double>(f2) || std::holds_alternative<int>(f2)))
-    {
-        double d1 = std::holds_alternative<double>(f1) ? std::get<double>(f1) : std::get<int>(f1);
-        double d2 = std::holds_alternative<double>(f2) ? std::get<double>(f2) : std::get<int>(f2);
-        return d1 - d2;
-    }
-    else if(std::holds_alternative<std::string>(f1) && std::holds_alternative<std::string>(f2))
-    {
-        return (int)(f1 != f2);
+        if (FingerprintUtil::isNumeric(f1) && FingerprintUtil::isNumeric(f2))
+            return FingerprintUtil::asDouble(f1) - FingerprintUtil::asDouble(f2);
+        else
+            return std::monostate();
     }
 
     return std::monostate();
