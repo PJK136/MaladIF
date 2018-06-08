@@ -37,6 +37,8 @@ L'exécutable généré est `build/src/MaladIF`.
 
 ## Mode d’emploi
 
+### Application MaladIF
+
 Pour accéder aux fonctionnalités de l’application, il faut d’abord charger la base de données : 
 
 	-> Appuyez sur 1 ou sur C.
@@ -60,6 +62,22 @@ Pour demander un diagnostic d’empreintes :
 Pour quitter l’application : 
 	
 	-> Appuyez sur 5 ou Q.
+
+### Générateur de données aléatoires
+
+Pour générer un fichier de métadonnées `metadata.txt` avec `[nbAttributs]` le nombre d'attributs en dehors de l'ID:
+
+```
+./generateRandomMetadata.py [nbAttributs] > metadata.txt
+```
+
+Pour générer un fichier de données `data.txt` avec `[nbEmpreintes]` le nombre d'empreintes et `[nbMaladies]` le nombre de maladies différentes :
+
+```
+./generateRandomData.py metadata.txt [nbEmpreintes] [nbMaladies]
+```
+
+Attention, le fichier `diseases.txt` doit être dans le répertoire d'exécution de `generateRandomData.py`.
 
 ## Auteurs
 
