@@ -286,53 +286,46 @@ Fingerprint Database::getDiseaseCharacteristics(const std::string & disease) con
     return {};
 }
 
-std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(const std::string & filename) const
+bool Database::startDiagnosis(const std::string & filename)
 {
     err = Database::Error::OK;
-
-    std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> result;
 
     if (data.empty())
     {
         err = Database::Error::NO_DATA;
-        return result;
+        return false;
     }
 
-    FileReader fileReader;
-    bool success = fileReader.open(filename, metadata);
+    bool success = diagnoseFile.open(filename, metadata);
 
     if(!success)
     {
-        setError(fileReader.error());
-        return result;
+        setError(diagnoseFile.error());
+        return false;
     }
 
-    std::pair<Fingerprint, std::string> loadedData(fileReader.nextFingerprint());
+    return true;
+}
 
-    if(fileReader.error())
+std::pair<Fingerprint,std::vector<Diagnosis>> Database::nextDiagnosis()
+{
+    err = Database::Error::OK;
+
+    std::pair<Fingerprint, std::string> loadedData(diagnoseFile.nextFingerprint());
+
+    if (diagnoseFile.error())
     {
-        setError(fileReader.error());
-        return result;
+        setError(diagnoseFile.error());
+        return {};
     }
 
-    while(!loadedData.first.values.empty())
+    std::vector<Diagnosis> diagnosis(diagnose(loadedData.first));
+    if (err)
     {
-        std::vector<Diagnosis> diagList = diagnose(loadedData.first);
-        if (err)
-        {
-            return result;
-        }
-        result.emplace_back(loadedData.first, diagList);
-        loadedData = fileReader.nextFingerprint();
-
-        if (fileReader.error() != FileReader::Error::OK && fileReader.error() != FileReader::Error::EMPTY)
-        {
-            setError(fileReader.error());
-            return result;
-        }
+        return {};
     }
 
-    return result;
+    return {loadedData.first, diagnosis};
 }
 
 std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
@@ -343,6 +336,7 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
     std::cerr << "diagnose : " << fingerprint << std::endl;
     #endif // NDEBUG
     std::vector<Diagnosis> diagnosisList;
+    diagnosisList.reserve(meanData.size());
     for (const auto & diseaseAndMeanFp : meanData)
     {
         Diagnosis d;
@@ -437,7 +431,9 @@ void Database::setError(FileReader::Error frErr) const
     }
 }
 
-Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), meanData(), metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue()
+Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), meanData(),
+                       metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue(),
+                       diagnoseFile()
 {
     //ctor
 }

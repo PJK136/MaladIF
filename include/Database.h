@@ -34,7 +34,8 @@ class Database
         std::vector<std::string> getDiseases() const;
         std::vector<Attribute> getAttributes() const;
         Fingerprint getDiseaseCharacteristics(const std::string & disease) const;
-        std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> diagnose(const std::string & filename) const;
+        bool startDiagnosis(const std::string & filename);
+        std::pair<Fingerprint,std::vector<Diagnosis>> nextDiagnosis();
 
 #ifndef NDEBUG
         void displayDatabase();
@@ -66,6 +67,8 @@ class Database
         Fingerprint fingerprintMax;
         Fingerprint fingerprintMin;
         Fingerprint fingerprintEtendue;
+
+        FileReader diagnoseFile;
 };
 
 #endif // DATABASE_H

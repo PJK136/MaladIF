@@ -11,7 +11,7 @@ class CLI
 
         void execute();
         void loadDatabase(std::string filenameMetadata = "", std::string filenameData = "");
-        void askDiagnosis(std::string filename = "") const;
+        void askDiagnosis(std::string filename = "");
 
     private:
         enum Choice {

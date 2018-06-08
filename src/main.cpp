@@ -6,6 +6,8 @@
 #include <string>
 
 int main(int argc, char *argv[]) {
+    std::ios::sync_with_stdio(false);
+
     CLI cli;
 
     if (argc > 2)

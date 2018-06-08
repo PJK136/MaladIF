@@ -154,7 +154,7 @@ void CLI::getDiseaseCharacteristics() const
     std::cout << "[" << characs << "]" << std::endl;
 }
 
-void CLI::askDiagnosis(std::string filename) const
+void CLI::askDiagnosis(std::string filename)
 {
     if (filename.empty())
     {
@@ -162,13 +162,24 @@ void CLI::askDiagnosis(std::string filename) const
         std::getline(std::cin, filename);
     }
 
-    std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> results = database.diagnose(filename);
-    if (!database.error())
+    if (database.startDiagnosis(filename))
     {
-        for (const auto & result : results)
+        auto result = database.nextDiagnosis();
+        while (!database.error())
         {
             std::cout << std::endl;
-            std::cout << "Empreinte [" << result.first << "] :" << std::endl << result.second << std::endl;
+            std::cout << "Empreinte [" << result.first << "] :\n";
+
+            if (!result.second.empty())
+            {
+                std::cout << result.second[0];
+                for (size_t i = 1; i < result.second.size() && result.second[i].risk >= 0.1; i++)
+                    std::cout << "\n" << result.second[i];
+            }
+
+            std::cout << std::endl;
+
+            result = database.nextDiagnosis();
         }
     }
     else
@@ -207,7 +218,7 @@ void CLI::printError(Database::Error error) const
 
 CLI::CLI() : database(), alreadyLoaded(false)
 {
-
+    //ctor
 }
 
 CLI::~CLI()

@@ -10,9 +10,9 @@
 inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis)
 {
     if (diagnosis.disease == "")
-        stream << "Maladie : Aucune ; Risque : " << diagnosis.risk * 100 << " %";
+        stream << "Maladie : Aucune ; Risque : " << (int)(diagnosis.risk * 100) << "." << (int)((diagnosis.risk * 100)*10)%10 << " %";
     else
-        stream << "Maladie : \"" << diagnosis.disease << "\" ; Risque : " << diagnosis.risk * 100 << " %";
+        stream << "Maladie : \"" << diagnosis.disease << "\" ; Risque : " << (int)(diagnosis.risk * 100) << "." << (int)((diagnosis.risk * 100)*10)%10 << " %";
     return stream;
 }
 
@@ -22,7 +22,7 @@ inline std::ostream &operator<<(std::ostream &stream, const std::vector<Diagnosi
     {
         stream << diagnosisList[0];
         for (size_t i = 1; i < diagnosisList.size(); i++)
-            stream << std::endl << diagnosisList[i];
+            stream << "\n" << diagnosisList[i];
     }
 
     return stream;
