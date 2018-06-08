@@ -23,18 +23,17 @@ main.cpp
 
 ## Mode d’emploi
 
-Pour accéder aux fonctionnalités de l’application il faut d’abord charger la base de données pour ce faire : 
+Pour accéder aux fonctionnalités de l’application, il faut d’abord charger la base de données : 
 
 	-> Appuyez sur 1 ou sur C.
 	-> Entrez le nom de fichier de métadonnées (sans oublier l’extension) qui se trouve au même niveau que l'exécutable.
-	-> Entrez le nom de fichier de données (sans oublier l’extension) correspondant au fichier de métadonnées 
-	qui se trouve au même niveau que l'exécutable.
+	-> Entrez le nom de fichier de données (sans oublier l’extension) correspondant au fichier de métadonnées qui se trouve au même niveau que l'exécutable.
 
-Pour avoir la liste des maladies répertoriées une fois la BD chargée :
+Pour avoir la liste des maladies répertoriées :
 	
 	-> Appuyez sur 2 ou sur L.
 
-Pour avoir les caractéristiques d’une maladie en particulier une fois la BD chargée :
+Pour avoir les caractéristiques d’une maladie en particulier :
 
 	-> Appuyez sur 3 ou sur A.
 	-> Entrez le nom de la maladie.
