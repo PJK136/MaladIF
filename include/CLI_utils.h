@@ -10,9 +10,9 @@
 inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis)
 {
     if (diagnosis.disease == "")
-        stream << "Maladie : Aucune ; Risque : " << (int)(diagnosis.risk * 100) << "." << (int)((diagnosis.risk * 100)*10)%10 << " %";
+        stream << "Aucune maladie avec un risque de " << (int)(diagnosis.risk * 100) << "." << (int)((diagnosis.risk * 100)*10)%10 << " %";
     else
-        stream << "Maladie : \"" << diagnosis.disease << "\" ; Risque : " << (int)(diagnosis.risk * 100) << "." << (int)((diagnosis.risk * 100)*10)%10 << " %";
+        stream << diagnosis.disease << " avec un risque de " << (int)(diagnosis.risk * 100) << "." << (int)((diagnosis.risk * 100)*10)%10 << " %";
     return stream;
 }
 
