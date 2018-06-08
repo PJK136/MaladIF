@@ -1,11 +1,12 @@
+# Malad'IF
 
 ## Objectif
 
-MaladIF est une application aux services des médecins qui permet à partir d’une base de données chargée 
-par l’utilisateur de donner les caractéristiques d’une maladie, et de donner un diagnostique à partir 
+Malad'IF est une application aux services des médecins qui permet à partir d’une base de données chargée 
+par l’utilisateur de donner les caractéristiques d’une maladie et d'effectuer des diagnostics à partir 
 d’un fichier d’empreintes.
 
-## Liste de fichier
+## Liste des fichiers
 
 CLI.cpp
 Database.cpp
@@ -18,13 +19,13 @@ FingerPrint.h
 Metadata.h
 main.cpp
 
-A compiler en C++ 17
+À compiler en C++ 17
 
 ## Mode d’emploi
 
 Pour accéder aux fonctionnalités de l’application il faut d’abord charger la base de données pour ce faire : 
 
-	-> Appuyez  sur 1 ou sur C.
+	-> Appuyez sur 1 ou sur C.
 	-> Entrez le nom de fichier de métadonnées (sans oublier l’extension) qui se trouve au même niveau que l'exécutable.
 	-> Entrez le nom de fichier de données (sans oublier l’extension) correspondant au fichier de métadonnées 
 	qui se trouve au même niveau que l'exécutable.
@@ -41,11 +42,11 @@ Pour avoir les caractéristiques d’une maladie en particulier une fois la BD c
 Pour demander un diagnostic d’empreintes : 
 	
 	-> Appuyez sur 4 ou sur D.
-	-> Entrez le nom du fichier contenant les empreintes. (sans oublier l’extension)
+	-> Entrez le nom du fichier contenant les empreintes (sans oublier l’extension).
 
 Pour quitter l’application : 
 	
-	->Appuyer sur 5 ou Q.
+	-> Appuyez sur 5 ou Q.
 
 ## Auteurs
 
