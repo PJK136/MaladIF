@@ -22,8 +22,8 @@ TEST(TU5, a1) {
     EXPECT_EQ(result.second.size(), 3);
 
     EXPECT_EQ(result.second[0].disease, "Maladie2");
-    EXPECT_EQ(result.second[1].disease, "");
-    EXPECT_EQ(result.second[2].disease, "Maladie1");
+    EXPECT_EQ(result.second[1].disease, "Maladie1");
+    EXPECT_EQ(result.second[2].disease, "");
 
     result = database.nextDiagnosis();
     EXPECT_EQ(database.error(), Database::Error::EMPTY_FILE);
@@ -48,8 +48,8 @@ TEST(TU5, a2) {
     EXPECT_EQ(result.second.size(), 3);
 
     EXPECT_EQ(result.second[0].disease, "Maladie2");
-    EXPECT_EQ(result.second[1].disease, "");
-    EXPECT_EQ(result.second[2].disease, "Maladie1");
+    EXPECT_EQ(result.second[1].disease, "Maladie1");
+    EXPECT_EQ(result.second[2].disease, "");
 
     fp.values = {2,std::string("False"),1.1,14.3,std::monostate(),2367.};
 
@@ -152,8 +152,8 @@ TEST(TU5, c2) {
     EXPECT_EQ(result.second.size(), 3);
 
     EXPECT_EQ(result.second[0].disease, "Maladie2");
-    EXPECT_EQ(result.second[1].disease, "");
-    EXPECT_EQ(result.second[2].disease, "Maladie1");
+    EXPECT_EQ(result.second[1].disease, "Maladie1");
+    EXPECT_EQ(result.second[2].disease, "");
 
     database.nextDiagnosis();
     EXPECT_EQ(database.error(), Database::Error::INVALID);
