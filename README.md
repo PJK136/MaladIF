@@ -47,7 +47,7 @@ Pour quitter l’application :
 	
 	->Appuyer sur 5 ou Q.
 
-## Authors
+## Auteurs
 
 * **Paul DU** - [PJK136](https://github.com/PJK136)
 * **Ismail JATTIOUI** - [yugismop](https://github.com/yugismop)
