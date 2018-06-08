@@ -130,6 +130,12 @@ void CLI::getDiseases() const
 
 void CLI::getDiseaseCharacteristics() const
 {
+    if (!alreadyLoaded)
+    {
+        printError(Database::Error::NO_DATA);
+        return;
+    }
+
     std::string disease;
     std::cout << "Entrez le nom de la maladie : " << std::endl;
     std::getline(std::cin, disease);
@@ -156,6 +162,12 @@ void CLI::getDiseaseCharacteristics() const
 
 void CLI::askDiagnosis(std::string filename)
 {
+    if (!alreadyLoaded)
+    {
+        printError(Database::Error::NO_DATA);
+        return;
+    }
+
     if (filename.empty())
     {
         std::cout << "Entrez le nom du fichier d'empreintes : " << std::endl;

@@ -50,7 +50,7 @@ class Database
         struct MeanFingerprintBuilder
         {
             Fingerprint sum{};
-            size_t fingerprintCount{0};
+            std::vector<size_t> counts{};
             StringValues stringValues{};
         };
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);
@@ -63,6 +63,7 @@ class Database
         std::unordered_map<std::string, std::list<Fingerprint>> data;
         std::unordered_map<std::string, MeanFingerprintBuilder> meanDataBuilder;
         std::unordered_map<std::string, Fingerprint> meanData;
+        std::unordered_map<std::string, std::vector<double>> stdDeviation;
         Metadata metadata;
         Fingerprint fingerprintMax;
         Fingerprint fingerprintMin;

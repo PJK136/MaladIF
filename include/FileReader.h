@@ -27,6 +27,7 @@ class FileReader
         ~FileReader();
 
         bool open(const std::string & filename, const Metadata & metadata);
+        void close();
         std::pair<Fingerprint, std::string> nextFingerprint();
 
         static Metadata readMetadata(const std::string & filename);

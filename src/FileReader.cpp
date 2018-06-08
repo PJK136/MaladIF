@@ -110,6 +110,15 @@ bool FileReader::open(const std::string & filename, const Metadata & mdata)
     return true;
 }
 
+void FileReader::close()
+{
+    err = Error::OK;
+    file.close();
+    metadata.attributes.clear();
+    metadata.attributesIndex.clear();
+    associatedIndex.clear();
+}
+
 std::pair<Fingerprint, std::string> FileReader::nextFingerprint()
 {
     err = FileReader::OK;
