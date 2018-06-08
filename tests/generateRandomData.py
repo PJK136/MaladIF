@@ -61,6 +61,17 @@ for d in range(D):
 
 print(header+"Disease")
 
+if True:
+    d = random.randint(0, D-1)
+    for j, t in enumerate(types):
+        ret = ""
+        if t == "ID":
+            ret = 0
+        else:
+            ret = dAttributes[d][j]
+        print(ret, end=';')
+    print(diseases[d])
+
 for i in range(1, N+1):
     d = random.randint(0, D-1)
     for j, t in enumerate(types):
@@ -77,7 +88,7 @@ for i in range(1, N+1):
             elif t == "string":
                 k = random.randint(0, len(dAttributes[d][j])-1)
                 ret = list(dAttributes[d][j])
-                ret[k] = chr(ord(ret[k])+random.randint(-1,1))
+                ret[k] = chr(ord(ret[k]) + (1 if random.random()<dispersion else 0))
                 ret = "".join(ret)
         print(ret, end=';')
     print(diseases[d])

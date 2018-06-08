@@ -20,18 +20,6 @@ bool Database::loadMetadata(const std::string & filename)
     if(!FileReader::metadataError())
     {
         metadata = metadataTemp;
-        fingerprintMax.values.resize(metadata.attributes.size());
-        fingerprintMin.values.resize(metadata.attributes.size());
-        fingerprintEtendue.values.resize(metadata.attributes.size());
-        for(size_t i=0; i < metadata.attributes.size(); ++i)
-        {
-            if(metadata.attributes[i].type == STRING)
-            {
-                fingerprintMax.values[i] = 1.;
-                fingerprintMin.values[i] = 0.;
-                fingerprintEtendue.values[i] = 1.;
-            }
-        }
         return true;
     }
     else
@@ -92,18 +80,6 @@ bool Database::loadData(const std::string & filename)
     }
 
 #endif // NDEBUG
-
-
-    //construction etendu
-    fingerprintEtendue.values.resize(metadata.attributes.size());
-    for (size_t i = 0; i < fingerprintEtendue.values.size(); i++)
-    {
-        auto diff = fingerprintMax.values[i] - fingerprintMin.values[i];
-        if (FingerprintUtil::isNumeric(diff))
-            fingerprintEtendue.values[i] = FingerprintUtil::asDouble(diff);
-        else
-            fingerprintEtendue.values[i] = std::monostate();
-    }
 
     //construction meanData & stdDeviation
     for (const auto & diseaseAndBuilder : meanDataBuilder)
@@ -184,12 +160,6 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
 
         if (metadata.attributes[i].type != STRING)
         {
-            if (std::holds_alternative<std::monostate>(fingerprintMax.values[i]) || fingerprint.values[i] > fingerprintMax.values[i])
-                fingerprintMax.values[i] = fingerprint.values[i];
-
-            if (std::holds_alternative<std::monostate>(fingerprintMin.values[i]) || fingerprint.values[i] < fingerprintMin.values[i])
-                fingerprintMin.values[i] = fingerprint.values[i];
-
             //meanDataBuilder
             if (std::holds_alternative<std::monostate>(meanDataBuilder[disease].sum.values[i])) //sum non initialise
                 meanDataBuilder[disease].sum.values[i] = (std::holds_alternative<bool>(fingerprint.values[i])) ? (int) std::get<bool>(fingerprint.values[i]) : fingerprint.values[i];
@@ -229,33 +199,6 @@ void Database::displayDatabase()
         }
         std::cout<<std::endl;
     }
-
-    std::cout<<"Min [";
-    for(const auto & value : fingerprintMin.values)
-    {
-        std::cout << " " << value;
-    }
-    std::cout<<" ] ";
-
-    std::cout << std::endl;
-
-    std::cout<<"Max [";
-    for(const auto & value : fingerprintMax.values)
-    {
-        std::cout << " " << value;
-    }
-    std::cout<<" ] ";
-
-    std::cout << std::endl;
-
-    std::cout<<"Etendue [";
-    for(const auto & value : fingerprintEtendue.values)
-    {
-        std::cout << " " << value;
-    }
-    std::cout<<" ] ";
-
-    std::cout << std::endl;
 }
 #endif
 
@@ -359,7 +302,7 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
     {
         Diagnosis d;
         d.disease = diseaseAndMeanFp.first;
-        d.risk = fingerprintMatch(fingerprint, diseaseAndMeanFp.second);
+        d.risk = fingerprintMatch(fingerprint, diseaseAndMeanFp.second, stdDeviation.at(d.disease));
         diagnosisList.push_back(d);
     }
 
@@ -372,7 +315,7 @@ std::vector<Diagnosis> Database::diagnose(const Fingerprint & fingerprint) const
     return diagnosisList;
 }
 
-double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2) const
+double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2, const std::vector<double> &stdDev) const
 {
     err = Database::Error::OK;
 
@@ -389,16 +332,23 @@ double Database::fingerprintMatch(const Fingerprint & fp1, const Fingerprint & f
     size_t size = diff.values.size();
     for (size_t i = 0; i < diff.values.size(); ++i)
     {
-        if (!std::holds_alternative<std::monostate>(fingerprintEtendue.values[i]) &&
-                !std::holds_alternative<std::monostate>(diff.values[i]) &&
+        if (!std::holds_alternative<std::monostate>(diff.values[i]) &&
                 metadata.attributes[i].type != ID)
         {
             if (metadata.attributes[i].type != BOOLEAN)
             {
                 double val = FingerprintUtil::asDouble(diff.values[i]);
-                double etendue = std::get<double>(fingerprintEtendue.values[i]);
 
-                sum += std::max(0., 1-((std::abs(val) / etendue)/EPSILON));
+                if (stdDev[i])
+                {
+                    double valNorm = std::abs(val) / (2*stdDev[i]); //Valeur centrée et réduite
+                    sum += erfc(valNorm * M_SQRT1_2); //Calcul d'une p-valeur
+                }
+                else
+                {
+                    if (!std::abs(val))
+                        sum += 1.;
+                }
             }
             else
             {
@@ -443,8 +393,7 @@ void Database::setError(FileReader::Error frErr) const
 }
 
 Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), meanData(),
-                       stdDeviation(), metadata(), fingerprintMax(), fingerprintMin(),
-                       fingerprintEtendue(), diagnoseFile()
+                       stdDeviation(), metadata(), diagnoseFile()
 {
     //ctor
 }

@@ -55,7 +55,7 @@ class Database
         };
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);
         std::vector<Diagnosis> diagnose(const Fingerprint & fingerprint) const;
-        double fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2) const;
+        double fingerprintMatch(const Fingerprint & fp1, const Fingerprint & fp2, const std::vector<double> & stdDev) const;
         void setError(FileReader::Error frErr) const;
 
         mutable Error err;
@@ -65,9 +65,6 @@ class Database
         std::unordered_map<std::string, Fingerprint> meanData;
         std::unordered_map<std::string, std::vector<double>> stdDeviation;
         Metadata metadata;
-        Fingerprint fingerprintMax;
-        Fingerprint fingerprintMin;
-        Fingerprint fingerprintEtendue;
 
         FileReader diagnoseFile;
 };
