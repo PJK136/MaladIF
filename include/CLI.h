@@ -2,7 +2,6 @@
 #define CLI_H
 
 #include "Database.h"
-#include <iostream>
 
 class CLI
 {
@@ -11,6 +10,8 @@ class CLI
         ~CLI();
 
         void execute();
+        void loadDatabase(std::string filenameMetadata = "", std::string filenameData = "");
+        void askDiagnosis(std::string filename = "") const;
 
     private:
         enum Choice {
@@ -21,70 +22,11 @@ class CLI
         };
 
         Choice showMenu() const;
-        void loadDatabase();
         void getDiseaseCharacteristics() const;
-        void askDiagnosis() const;
         void printError(Database::Error error) const;
 
         Database database;
         bool alreadyLoaded;
 };
-
-inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis)
-{
-    if (diagnosis.disease == "")
-        stream << "Patient sain; Risque : " << diagnosis.risk * 100 << "%";
-    else
-        stream << "Maladie : \"" << diagnosis.disease << "\"; Risque : " << diagnosis.risk * 100 << "%";
-    return stream;
-}
-
-inline std::ostream &operator<<(std::ostream &stream, const std::vector<Diagnosis> &diagnosisList)
-{
-    for (const Diagnosis &diagnosis : diagnosisList)
-    {
-        stream << "-> " << diagnosis << std::endl;
-    }
-    return stream;
-}
-
-inline std::ostream &operator<<(std::ostream &stream, const Metadata &metadata)
-{
-    for (size_t i(0); i < metadata.attributes.size(); i++)
-        stream << "Case " << i << " : " << metadata.attributes.at(i).name << " | " << metadata.attributes.at(i).type
-               << " -> " << metadata.attributesIndex.at(metadata.attributes.at(i).name) << std::endl;
-
-    return stream;
-}
-
-inline std::ostream &operator<<(std::ostream &stream, const FingerprintValue &v)
-{
-    if (std::holds_alternative<std::monostate>(v)) {
-        return stream << "monostate";
-    } else if (std::holds_alternative<bool>(v)) {
-        return stream << std::get<1>(v);
-    } else if (std::holds_alternative<int>(v)) {
-        return stream << std::get<2>(v);
-    } else if (std::holds_alternative<double>(v)) {
-        return stream << std::get<3>(v);
-    } else if (std::holds_alternative<std::string>(v)) {
-        return stream << std::get<4>(v);
-    } else {
-        return stream << "unsupported type";
-    }
-}
-
-inline std::ostream &operator<<(std::ostream &stream, const Fingerprint &fi)
-{
-    if (!fi.values.empty())
-    {
-        stream << fi.values[0];
-        for (size_t i = 1; i < fi.values.size(); i++)
-            stream << " | " << fi.values[i];
-    }
-
-    return stream;
-}
-
 
 #endif // CLI_H

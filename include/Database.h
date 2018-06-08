@@ -31,9 +31,12 @@ class Database
 
         bool loadMetadata(const std::string & filename);
         bool loadData(const std::string & filename);
-        std::list<Fingerprint> getDiseaseCharacteristics(const std::string & disease) const;
+        Fingerprint getDiseaseCharacteristics(const std::string & disease) const;
         std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> diagnose(const std::string & filename) const;
-        void displayDataBase();
+
+#ifndef NDEBUG
+        void displayDatabase();
+#endif
 
         inline Error error() const { return err; }
 

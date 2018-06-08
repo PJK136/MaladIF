@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-//analyse d'une empreinte présente dans les données
+//analyse d'une empreinte prÃ©sente dans les donnÃ©es
 TEST(TU5, a1) {
     Database database;
     ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
@@ -108,7 +108,7 @@ TEST(TU5, b4) {
     ASSERT_EQ(diagnosis.size(), 0);
 }
 
-//fichier d'empreintes avec des attributs en moins dans la déclaration des attributs
+//fichier d'empreintes avec des attributs en moins dans la dÃ©claration des attributs
 TEST(TU5, b5) {
     Database database;
     ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
@@ -120,7 +120,7 @@ TEST(TU5, b5) {
     ASSERT_EQ(diagnosis.size(), 0);
 }
 
-//fichier d'empreintes avec des attributs en moins sur la première empreinte
+//fichier d'empreintes avec des attributs en moins sur la premiÃ¨re empreinte
 TEST(TU5, c1) {
     Database database;
     ASSERT_TRUE(database.loadMetadata("metadata1.txt"));
@@ -132,7 +132,7 @@ TEST(TU5, c1) {
     ASSERT_EQ(diagnosis.size(), 0);
 }
 
-//fichier d'empreintes avec la 2ème empreinte non valide
+//fichier d'empreintes avec la 2Ã¨me empreinte non valide
 TEST(TU5, c2) {
     Database database;
     ASSERT_TRUE(database.loadMetadata("metadata1.txt"));

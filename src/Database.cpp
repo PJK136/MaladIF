@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #ifndef NDEBUG
-    #include <iostream>
+    #include <CLI_utils.h>
 #endif
 
 constexpr double EPSILON = 0.1;
@@ -112,7 +112,11 @@ bool Database::loadData(const std::string & filename)
         meanData[diseaseAndBuilder.first].values.resize(metadata.attributes.size());
         for (size_t i = 0; i < metadata.attributes.size(); ++i)
         {
-            if (metadata.attributes[i].type == STRING)
+            if (metadata.attributes[i].type == ID)
+            {
+                meanData[diseaseAndBuilder.first].values[i] = std::monostate();
+            }
+            else if (metadata.attributes[i].type == STRING)
             {
                 auto &stringValues = diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name);
                 meanData[diseaseAndBuilder.first].values[i] = std::max_element(stringValues.begin(), stringValues.end(),
@@ -191,8 +195,8 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     meanDataBuilder[disease].fingerprintCount += 1;
 }
 
-//TOOD : À déplacer
-void Database::displayDataBase()
+#ifndef NDEBUG
+void Database::displayDatabase()
 {
     for (const auto & entry : data)
     {
@@ -236,26 +240,27 @@ void Database::displayDataBase()
 
     std::cout << std::endl;
 }
+#endif
 
-std::list<Fingerprint> Database::getDiseaseCharacteristics(const std::string & disease) const
+Fingerprint Database::getDiseaseCharacteristics(const std::string & disease) const
 {
     err = Database::Error::OK;
 
     if (data.empty())
     {
         err = Database::Error::NO_DATA;
-        return std::list<Fingerprint>{};
+        return {};
     }
 
-    auto it = data.find(disease);
-    if (it != data.end())
+    auto it = meanData.find(disease);
+    if (it != meanData.end())
     {
         err = Database::Error::OK;
         return it->second;
     }
 
     err = Database::Error::NOT_FOUND;
-    return std::list<Fingerprint>{};
+    return {};
 }
 
 std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> Database::diagnose(const std::string & filename) const

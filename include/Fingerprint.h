@@ -76,4 +76,18 @@ inline Fingerprint operator-(const Fingerprint &f1, const Fingerprint &f2)
     return diff;
 }
 
+inline bool strcmp_nocase(std::string const& a, std::string const& b)
+{
+    if (a.length() == b.length()) {
+        return std::equal(b.begin(), b.end(), a.begin(),
+                          [](unsigned char a, unsigned char b)
+                          {
+                              return std::tolower(a) == std::tolower(b);
+                          });
+    }
+    else {
+        return false;
+    }
+}
+
 #endif // FINGERPRINT_H
