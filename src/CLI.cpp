@@ -185,7 +185,7 @@ void CLI::askDiagnosis(std::string filename)
             if (!result.second.empty())
             {
                 std::cout << result.second[0];
-                for (size_t i = 1; i < result.second.size() && result.second[i].risk >= 0.1; i++)
+                for (size_t i = 1; i < result.second.size() && result.second[i].risk >= 0.001; i++)
                     std::cout << "\n" << result.second[i];
             }
 
