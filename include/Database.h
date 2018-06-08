@@ -63,6 +63,7 @@ class Database
         std::unordered_map<std::string, std::list<Fingerprint>> data;
         std::unordered_map<std::string, MeanFingerprintBuilder> meanDataBuilder;
         std::unordered_map<std::string, Fingerprint> meanData;
+        std::unordered_map<std::string, std::vector<double>> stdDeviation;
         Metadata metadata;
         Fingerprint fingerprintMax;
         Fingerprint fingerprintMin;

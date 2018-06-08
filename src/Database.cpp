@@ -3,6 +3,7 @@
 #include "CLI.h"
 #include <numeric>
 #include <algorithm>
+#include <cmath>
 
 #ifndef NDEBUG
     #include <CLI_utils.h>
@@ -106,10 +107,11 @@ bool Database::loadData(const std::string & filename)
             fingerprintEtendue.values[i] = std::monostate();
     }
 
-    //construction meanData
+    //construction meanData & stdDeviation
     for (const auto & diseaseAndBuilder : meanDataBuilder)
     {
         meanData[diseaseAndBuilder.first].values.resize(metadata.attributes.size());
+        stdDeviation[diseaseAndBuilder.first].resize(metadata.attributes.size(), 0.);
         for (size_t i = 0; i < metadata.attributes.size(); ++i)
         {
             if (metadata.attributes[i].type == ID)
@@ -138,13 +140,40 @@ bool Database::loadData(const std::string & filename)
                 }
             }
         }
+
+        //calcul ecart type ------------
+        for (const Fingerprint & fingerprint : data[diseaseAndBuilder.first])
+        {
+            for (size_t i = 0; i < metadata.attributes.size(); ++i)
+            {
+                if (metadata.attributes[i].type != ID && metadata.attributes[i].type != STRING && !std::holds_alternative<std::monostate>(fingerprint.values[i]))
+                {
+                    double value;
+                    if (metadata.attributes[i].type == BOOLEAN)
+                        value = std::get<bool>(fingerprint.values[i]);
+                    else if (metadata.attributes[i].type == INT)
+                        value = std::get<int>(fingerprint.values[i]);
+                    else //double
+                        value = std::get<double>(fingerprint.values[i]);
+                    double mean = std::get<double>(meanData[diseaseAndBuilder.first].values[i]);
+                    stdDeviation[diseaseAndBuilder.first][i] += (value - mean) * (value - mean);
+                }
+            }
+        }
+
+        for (size_t i = 0; i < metadata.attributes.size(); ++i)
+        {
+             stdDeviation[diseaseAndBuilder.first][i] = std::sqrt(stdDeviation[diseaseAndBuilder.first][i] / diseaseAndBuilder.second.counts[i]);
+        }
     }
+
 
 #ifndef NDEBUG
     std::cerr << "---- MEAN DATA ----" << std::endl;
     for (const auto & diseaseAndMeanFp : meanData)
     {
         std::cerr << "[" << diseaseAndMeanFp.first << "] -> " << diseaseAndMeanFp.second << std::endl;
+        std::cerr << std::string(diseaseAndMeanFp.first.size() + 6, ' ') << stdDeviation[diseaseAndMeanFp.first] << std::endl;
     }
 #endif // NDEBUG
 
@@ -433,8 +462,8 @@ void Database::setError(FileReader::Error frErr) const
 }
 
 Database::Database() : err(Database::Error::OK), data(), meanDataBuilder(), meanData(),
-                       metadata(), fingerprintMax(), fingerprintMin(), fingerprintEtendue(),
-                       diagnoseFile()
+                       stdDeviation(), metadata(), fingerprintMax(), fingerprintMin(),
+                       fingerprintEtendue(), diagnoseFile()
 {
     //ctor
 }
