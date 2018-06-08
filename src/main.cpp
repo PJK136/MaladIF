@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
         cli.loadDatabase(argv[1], argv[2]);
         if (argc > 3)
             cli.askDiagnosis(argv[3]);
+        else
+            cli.execute();
     }
     else
         cli.execute();
