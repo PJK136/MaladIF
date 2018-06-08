@@ -19,7 +19,21 @@ FingerPrint.h
 Metadata.h
 main.cpp
 
-À compiler en C++ 17
+## Compilation du projet
+
+Pour compiler ce projet, il faut CMake, git et un compilateur supportant le C++17 (par exemple GCC >7.0).
+
+À la racine du répertoire des sources (contenant ce README.md), sous Linux, il suffit de taper :
+
+```
+mkdir build #Pour ne pas mélanger sources et objets générés
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release .. #Pour générer la version Debug
+make
+make test #Pour lancer les tests
+```
+
+L'exécutable généré est `build/src/MaladIF`.
 
 ## Mode d’emploi
 

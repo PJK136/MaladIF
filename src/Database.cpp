@@ -94,11 +94,15 @@ bool Database::loadData(const std::string & filename)
             }
             else if (metadata.attributes[i].type == STRING)
             {
-                const auto &stringValues = diseaseAndBuilder.second.stringValues.at(metadata.attributes[i].name);
-                meanData[diseaseAndBuilder.first].values[i] = std::max_element(stringValues.begin(), stringValues.end(),
-                                                                               [](const std::pair<std::string,size_t> &p1, const std::pair<std::string,size_t> &p2) {
-                                                                                   return p1.second < p2.second;
-                                                                               })->first;
+                auto it = diseaseAndBuilder.second.stringValues.find(metadata.attributes[i].name);
+                if (it != diseaseAndBuilder.second.stringValues.end())
+                {
+                    const auto &stringValues = it->second;
+                    meanData[diseaseAndBuilder.first].values[i] = std::max_element(stringValues.begin(), stringValues.end(),
+                                                                                   [](const std::pair<std::string,size_t> &p1, const std::pair<std::string,size_t> &p2) {
+                                                                                       return p1.second < p2.second;
+                                                                                   })->first;
+                }
             }
             else
             {
