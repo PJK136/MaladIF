@@ -29,7 +29,15 @@ with open(filename) as f:
 N = int(sys.argv[2])
 D = int(sys.argv[3])
 
-diseases = random.sample(dnames, D-1)
+if D-1 < 245:
+    diseases = random.sample(dnames, D-1)
+else:
+    diseases = []
+    for i in range(D-1):
+        diseases.append("")
+        for j in range(random.randint(5, 20)):
+            diseases[-1] += random.choice(string.ascii_letters)
+
 diseases.append("")
 dAttributes = []
 for d in range(D):
