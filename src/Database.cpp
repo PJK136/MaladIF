@@ -242,6 +242,29 @@ void Database::displayDatabase()
 }
 #endif
 
+std::vector<std::string> Database::getDiseases() const
+{
+    err = Database::Error::OK;
+
+    if (data.empty())
+    {
+        err = Database::Error::NO_DATA;
+        return {};
+    }
+
+    std::vector<std::string> diseases;
+    diseases.reserve(data.size());
+    for (auto &d : data)
+        diseases.push_back(d.first);
+
+    std::sort(diseases.begin(), diseases.end());
+    return diseases;
+}
+
+std::vector<Attribute> Database::getAttributes() const {
+    return metadata.attributes;
+}
+
 Fingerprint Database::getDiseaseCharacteristics(const std::string & disease) const
 {
     err = Database::Error::OK;

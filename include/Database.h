@@ -31,6 +31,8 @@ class Database
 
         bool loadMetadata(const std::string & filename);
         bool loadData(const std::string & filename);
+        std::vector<std::string> getDiseases() const;
+        std::vector<Attribute> getAttributes() const;
         Fingerprint getDiseaseCharacteristics(const std::string & disease) const;
         std::list<std::pair<Fingerprint,std::vector<Diagnosis>>> diagnose(const std::string & filename) const;
 

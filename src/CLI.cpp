@@ -11,6 +11,9 @@ void CLI::execute()
             case LOAD_DATABASE:
                 loadDatabase();
                 break;
+            case GET_DISEASES:
+                getDiseases();
+                break;
             case GET_DISEASE_CHARACTERISTICS:
                 getDiseaseCharacteristics();
                 break;
@@ -36,9 +39,10 @@ CLI::Choice CLI::showMenu() const
     std::cout << "(VERSION DEBUG)" << std::endl;
 #endif // NDEBUG
     std::cout<<"1. (C)harger la base de données"<<std::endl;
-    std::cout<<"2. (A)fficher caractéristique maladie"<<std::endl;
-    std::cout<<"3. (D)emander diagnostic d'empreintes"<<std::endl;
-    std::cout<<"4. (Q)uitter"<<std::endl;
+    std::cout<<"2. (L)ister les maladies répertoriées"<<std::endl;
+    std::cout<<"3. (A)fficher les caractéristiques d'une maladie"<<std::endl;
+    std::cout<<"4. (D)emander le diagnostic d'empreintes"<<std::endl;
+    std::cout<<"5. (Q)uitter"<<std::endl;
     while(true)
     {
         std::cout << "Votre choix : " << std::flush;
@@ -48,15 +52,19 @@ CLI::Choice CLI::showMenu() const
         {
             return LOAD_DATABASE;
         }
-        else if(strcmp_nocase(choice, "A") || choice == "2" )
+        else if(strcmp_nocase(choice, "L") || choice == "2" )
+        {
+            return GET_DISEASES;
+        }
+        else if(strcmp_nocase(choice, "A") || choice == "3" )
         {
             return GET_DISEASE_CHARACTERISTICS;
         }
-        else if(strcmp_nocase(choice, "D") || choice == "3")
+        else if(strcmp_nocase(choice, "D") || choice == "4")
         {
             return ASK_DIAGNOSIS;
         }
-        else if(strcmp_nocase(choice, "Q") || choice == "4")
+        else if(strcmp_nocase(choice, "Q") || choice == "5")
         {
             return EXIT;
         }
@@ -103,12 +111,46 @@ void CLI::loadDatabase(std::string filenameMetadata, std::string filenameData)
     std::cout << "Base de données chargée !" << std::endl;
 }
 
+void CLI::getDiseases() const
+{
+    auto diseases = database.getDiseases();
+    if (database.error())
+    {
+        printError(database.error());
+        return;
+    }
+
+    std::cout << "Liste des maladies répertoriées : " << std::endl;
+    for (auto &disease : diseases)
+    {
+        if (!disease.empty())
+            std::cout << " - " << disease << std::endl;
+    }
+}
+
 void CLI::getDiseaseCharacteristics() const
 {
     std::string disease;
     std::cout << "Entrez le nom de la maladie : " << std::endl;
     std::getline(std::cin, disease);
+
     Fingerprint characs = database.getDiseaseCharacteristics(disease);
+    if (database.error())
+    {
+        printError(database.error());
+        return;
+    }
+
+    std::vector<Attribute> attributes(database.getAttributes());
+    std::cout << "<";
+    if (!attributes.empty())
+    {
+        std::cout << attributes[0].name;
+        for (size_t i = 1; i < attributes.size(); i++)
+            std::cout << " | " << attributes[i].name;
+    }
+    std::cout << ">" << std::endl;
+
     std::cout << "[" << characs << "]" << std::endl;
 }
 
@@ -125,6 +167,7 @@ void CLI::askDiagnosis(std::string filename) const
     {
         for (const auto & result : results)
         {
+            std::cout << std::endl;
             std::cout << "Empreinte [" << result.first << "] :" << std::endl << result.second << std::endl;
         }
     }
@@ -151,7 +194,7 @@ void CLI::printError(Database::Error error) const
             std::cerr << "Le fichier est invalide." << std::endl;
             break;
         case Database::Error::NOT_FOUND:
-            std::cerr << "La maladie n'est pas referencée." <<std::endl;
+            std::cerr << "La maladie n'est pas référencée." <<std::endl;
             break;
         case Database::Error::NO_DATA:
             std::cerr << "Les données n'ont pas été chargées." << std::endl;

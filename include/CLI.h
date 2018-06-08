@@ -16,12 +16,14 @@ class CLI
     private:
         enum Choice {
             LOAD_DATABASE,
+            GET_DISEASES,
             GET_DISEASE_CHARACTERISTICS,
             ASK_DIAGNOSIS,
             EXIT
         };
 
         Choice showMenu() const;
+        void getDiseases() const;
         void getDiseaseCharacteristics() const;
         void printError(Database::Error error) const;
 

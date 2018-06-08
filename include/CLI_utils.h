@@ -18,10 +18,13 @@ inline std::ostream &operator<<(std::ostream &stream, const Diagnosis &diagnosis
 
 inline std::ostream &operator<<(std::ostream &stream, const std::vector<Diagnosis> &diagnosisList)
 {
-    for (const Diagnosis &diagnosis : diagnosisList)
+    if (!diagnosisList.empty())
     {
-        stream << "-> " << diagnosis << std::endl;
+        stream << diagnosisList[0];
+        for (size_t i = 1; i < diagnosisList.size(); i++)
+            stream << std::endl << diagnosisList[i];
     }
+
     return stream;
 }
 
