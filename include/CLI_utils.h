@@ -28,6 +28,18 @@ inline std::ostream &operator<<(std::ostream &stream, const std::vector<Diagnosi
     return stream;
 }
 
+inline std::ostream &operator<<(std::ostream &stream, const std::vector<size_t> &list)
+{
+    if (!list.empty())
+    {
+        stream << list[0];
+        for (size_t i = 1; i < list.size(); i++)
+            stream << " | " << list[i];
+    }
+
+    return stream;
+}
+
 inline std::ostream &operator<<(std::ostream &stream, const Metadata &metadata)
 {
     for (size_t i(0); i < metadata.attributes.size(); i++)

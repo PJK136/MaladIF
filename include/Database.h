@@ -50,7 +50,7 @@ class Database
         struct MeanFingerprintBuilder
         {
             Fingerprint sum{};
-            size_t fingerprintCount{0};
+            std::vector<size_t> counts{};
             StringValues stringValues{};
         };
         void addFingerprint(const Fingerprint & fingerprint, const std::string & disease);

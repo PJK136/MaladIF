@@ -78,7 +78,7 @@ bool Database::loadData(const std::string & filename)
     {
         std::cerr << "DISEASE : " << diseaseAndBuilder.first << std::endl;
         std::cerr << "\tSUM : " << diseaseAndBuilder.second.sum << std::endl;
-        std::cerr << "\tCOUNT : " << diseaseAndBuilder.second.fingerprintCount << std::endl;
+        std::cerr << "\tCOUNTS : " << diseaseAndBuilder.second.counts << std::endl;
         std::cerr << "\tSTRINGS :" << std::endl;
         for (const auto & attributeAndStrings : diseaseAndBuilder.second.stringValues)
         {
@@ -134,7 +134,7 @@ bool Database::loadData(const std::string & filename)
                         sum = std::get<int>(sumValue);
                     else if (std::holds_alternative<double>(sumValue))
                         sum = std::get<double>(sumValue);
-                    meanData[diseaseAndBuilder.first].values[i] = sum / diseaseAndBuilder.second.fingerprintCount;
+                    meanData[diseaseAndBuilder.first].values[i] = sum / diseaseAndBuilder.second.counts[i];
                 }
             }
         }
@@ -159,6 +159,7 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
     if (meanDataBuilder.find(disease) == meanDataBuilder.end()) //init si maladie non existante
     {
         meanDataBuilder[disease].sum.values.resize(fingerprint.values.size());
+        meanDataBuilder[disease].counts.resize(fingerprint.values.size(), 0);
     }
     for(size_t i = 0; i < fingerprint.values.size(); i++)
     {
@@ -190,9 +191,9 @@ void Database::addFingerprint(const Fingerprint & fingerprint, const std::string
         {
             meanDataBuilder[disease].stringValues[metadata.attributes[i].name][std::get<std::string>(fingerprint.values[i])] += 1;
         }
-    }
 
-    meanDataBuilder[disease].fingerprintCount += 1;
+        meanDataBuilder[disease].counts[i] += 1;
+    }
 }
 
 #ifndef NDEBUG
