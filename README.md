@@ -37,11 +37,11 @@ Ces commandes fonctionnent bien sous Linux où CMake, GCC et Make déjà sont da
 
 Pour Windows, on peut télécharger [CMake](https://cmake.org/download/) et [Mingw64](https://sourceforge.net/projects/mingw-w64/files/mingw-w64/).
 
-Il faut alors penser à mettre leur dossier bin dans le PATH, et au lieu de `make`, cela sera `mingw32-make`.
+Il faut alors penser à mettre leurs dossiers `bin` dans le PATH, et au lieu de `make`, cela sera `mingw32-make`.
 
 Il est également possible d'ouvrir le projet avec un IDE supportant CMake comme CLion (testé) ou Visual Studio 2017 (non-testé) pour le compiler.
 
-Ou de générer différents Makefile ou projets d'IDE. [Doc](https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html) [Tutoriel] (http://preshing.com/20170511/how-to-build-a-cmake-based-project/)
+Ou de générer différents Makefile ou projets d'IDE. [Doc](https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html) [Tutoriel](http://preshing.com/20170511/how-to-build-a-cmake-based-project/)
 
 ## Mode d’emploi
 
