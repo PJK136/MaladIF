@@ -2,9 +2,7 @@
 
 ## Objectif
 
-Malad'IF est une application aux services des médecins qui permet à partir d’une base de données chargée 
-par l’utilisateur de donner les caractéristiques d’une maladie et d'effectuer des diagnostics à partir 
-d’un fichier d’empreintes.
+Malad'IF est une application aux services des médecins qui permet à partir d’une base de données chargée par l’utilisateur de donner les caractéristiques d’une maladie et d'effectuer des diagnostics à partir d’un fichier d’empreintes.
 
 ## Liste des fichiers
 
@@ -23,21 +21,33 @@ main.cpp
 
 Pour compiler ce projet, il faut CMake, git et un compilateur supportant le C++17 (par exemple GCC >7.0).
 
-À la racine du répertoire des sources (contenant ce README.md), sous Linux, il suffit de taper :
+À la racine du répertoire des sources (contenant ce README.md), il suffit de taper :
 
 ```
 mkdir build #Pour ne pas mélanger sources et objets générés
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release .. #Pour générer la version Debug
+cmake -DCMAKE_BUILD_TYPE=Release .. #Pour générer la version Release (et non Debug)
 make
 make test #Pour lancer les tests
 ```
 
-L'exécutable généré est `build/src/MaladIF`.
+L'exécutable généré est situé à `build/src/MaladIF`.
+
+Ces commandes fonctionnent bien sous Linux où CMake, GCC et Make déjà sont dans le PATH.
+
+Pour Windows, on peut télécharger [CMake](https://cmake.org/download/) et [Mingw64](https://sourceforge.net/projects/mingw-w64/files/mingw-w64/).
+
+Il faut alors penser à mettre leur dossier bin dans le PATH, et au lieu de `make`, cela sera `mingw32-make`.
+
+Il est également possible d'ouvrir le projet avec un IDE supportant CMake comme CLion (testé) ou Visual Studio 2017 (non-testé) pour le compiler.
+
+Ou de générer différents Makefile ou projets d'IDE. [Doc](https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html) [Tutoriel] (http://preshing.com/20170511/how-to-build-a-cmake-based-project/)
 
 ## Mode d’emploi
 
 ### Application MaladIF
+
+Pour lancer l'application, il suffit de lancer l'exécution `MaladIF` sans paramètres en ligne de commande.
 
 Pour accéder aux fonctionnalités de l’application, il faut d’abord charger la base de données : 
 
@@ -62,6 +72,12 @@ Pour demander un diagnostic d’empreintes :
 Pour quitter l’application : 
 	
 	-> Appuyez sur 5 ou Q.
+
+Il est également possible de lancer l'application et d'effectuer directement un diagnostic sans passer par le menu :
+
+```
+./MaladIF metadata.txt data.txt empreintes.txt
+```
 
 ### Générateur de données aléatoires
 
